@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { createClient } from '@/utils/supabase/server'
 
 export default async function ContactsPage() {
@@ -13,9 +14,9 @@ export default async function ContactsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Contatti</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+        <Link href="/contacts/new" className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
           Nuovo Contatto
-        </button>
+        </Link>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
