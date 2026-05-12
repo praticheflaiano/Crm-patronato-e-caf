@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CRM Patronato e CAF
 
-## Getting Started
+Applicazione Next.js per Centro Pratiche Flaiano, pensata per gestire contatti, pratiche CAF/Patronato, documenti, task e assistente AI con base dati Supabase.
 
-First, run the development server:
+## Avvio locale
+
+1. Installa le dipendenze:
+
+```bash
+npm install
+```
+
+2. Crea `.env.local` partendo da `.env.example` e inserisci le credenziali Supabase.
+
+3. Avvia il progetto:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Apri `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Se `.env.local` non è configurato, l'app mostra una schermata di configurazione invece di andare in errore.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Database
 
-## Learn More
+Le migrazioni iniziali sono in `supabase/migrations`:
 
-To learn more about Next.js, take a look at the following resources:
+- `0001_initial_schema.sql`: schema contatti, pratiche, documenti, task e certificati medici.
+- `0002_rls_policies.sql`: policy RLS di base per utenti autenticati.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Documentazione
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Il piano architetturale e operativo è in `docs/`.

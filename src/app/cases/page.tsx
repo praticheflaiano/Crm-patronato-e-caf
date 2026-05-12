@@ -1,8 +1,15 @@
+import Link from "next/link"
+import { SetupNotice } from '@/components/setup-notice'
+import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 
 export default async function CasesPage() {
-  const supabase = await createClient()
+  if (!hasSupabaseConfig()) {
+    return <SetupNotice />
+  }
 
+  const supabase = await createClient()
+  
   // Example fetch, assuming RLS allows this (which requires auth)
   const { data: cases, error } = await supabase
     .from('cases')
@@ -19,9 +26,9 @@ export default async function CasesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Pratiche</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+        <Link href="/cases/new" className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
           Nuova Pratica
-        </button>
+        </Link>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -66,7 +73,7 @@ export default async function CasesPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" className="text-blue-600 hover:text-blue-900">Dettagli</a>
+                    <Link href={`/cases/${caseItem.id}`} className="text-blue-600 hover:text-blue-900">Dettagli</Link>
                   </td>
                 </tr>
               ))

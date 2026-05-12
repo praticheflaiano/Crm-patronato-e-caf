@@ -1,13 +1,20 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Database } from '@/types/database'
+import { getSupabasePublishableKey, getSupabaseUrl } from './config'
 
 export async function createClient() {
   const cookieStore = await cookies()
+  const supabaseUrl = getSupabaseUrl()
+  const supabaseKey = getSupabasePublishableKey()
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase environment variables are not configured')
+  }
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
@@ -32,9 +39,16 @@ export async function createClient() {
 // Function specifically for admin tasks that require the service role key
 // IMPORTANT: Never expose NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY to the browser
 export async function createAdminClient() {
+    const supabaseUrl = getSupabaseUrl()
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !serviceRoleKey) {
+        throw new Error('Supabase admin environment variables are not configured')
+    }
+
     return createServerClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use private env variable
+        supabaseUrl,
+        serviceRoleKey,
         {
           cookies: {
             getAll() {

@@ -1,11 +1,16 @@
 import { openai } from '@ai-sdk/openai'
 import { streamText } from 'ai'
+import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
 
 export async function POST(req: Request) {
+  if (!hasSupabaseConfig()) {
+    return new Response('Supabase is not configured', { status: 503 })
+  }
+
   const { messages } = await req.json()
 
   // Ensure user is authenticated
@@ -23,7 +28,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: openai('gpt-4o'),
-    system: `Sei l'assistente virtuale del CAF e Patronato "Centro Pratiche Flaiano".
+    system: `Sei l'assistente virtuale del CAF e Patronato "Centro Pratiche Flaiano". 
     Il tuo compito è aiutare gli operatori a gestire pratiche, consultare documentazione e rispondere a domande normative.
     Non fornire mai diagnosi mediche. Se non conosci una risposta, dillo chiaramente.`,
     messages,

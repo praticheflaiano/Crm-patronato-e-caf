@@ -1,9 +1,17 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { Database } from '@/types/database'
+import { getSupabasePublishableKey, getSupabaseUrl } from './config'
 
 export function createClient() {
+  const supabaseUrl = getSupabaseUrl()
+  const supabaseKey = getSupabasePublishableKey()
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase environment variables are not configured')
+  }
+
   return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    supabaseUrl,
+    supabaseKey
   )
 }
