@@ -75,8 +75,8 @@ Ultimo aggiornamento: 2026-05-12
 
 1. Profili, organizzazione e ruoli. Completato.
 2. CRUD completo contatti e pratiche. Base completata.
-3. Pipeline pratiche e stati strutturati. In lavorazione.
-4. Documenti con upload/download privato. In lavorazione.
+3. Pipeline pratiche e stati strutturati. Base completata.
+4. Documenti con upload/download privato. Base completata.
 5. Task e note. Da fare.
 6. RLS avanzata per admin, operatori, collaboratori e medici. Da fare.
 7. Modulo Invalidita Civile. Da fare.
@@ -86,17 +86,17 @@ Ultimo aggiornamento: 2026-05-12
 
 ## Team agenti attivo
 
-- Worker Pipeline: stati pratica, label, badge e flusso avanzamento.
-- Worker Documenti: upload su bucket `documents`, metadati e signed URL.
-- Worker UX CRUD: uniformare form e stati vuoti.
+- Worker Pipeline: stati pratica, label, badge e flusso avanzamento. Integrato.
+- Worker Documenti: upload su bucket `documents`, metadati e signed URL. Integrato.
+- Worker UX CRUD: uniformare form e stati vuoti. Integrato.
 
 ## Prossimo obiettivo operativo
 
 Integrare i risultati dei worker in questo ordine:
 
-1. Pipeline/stati, perche influenza schermate pratiche e modifica pratica.
-2. Documenti, perche usa il dettaglio pratica.
-3. UX CRUD, per rifinire le pagine dopo le modifiche funzionali.
+1. Task e note su pratica.
+2. RLS avanzata per collaboratori e medici.
+3. Modulo Invalidita Civile.
 
 ## Comandi di verifica
 
@@ -115,3 +115,5 @@ In caso di errore `EPERM` su `.next` in Windows/OneDrive:
 
 - `6f60367` - Polish CRM core screens
 - `d4bc0d2` - Add roles and core CRUD flows
+- `ca343ac` - Add project progress memory
+- `ff5ea33` - Add workflow and document handling
