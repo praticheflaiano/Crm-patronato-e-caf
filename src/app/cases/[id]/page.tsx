@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { Edit } from 'lucide-react'
+import { CaseDocuments } from '@/components/documents/case-documents'
 import { SetupNotice } from '@/components/setup-notice'
+import { getAllowedNextStatuses, getCaseStatusMeta, getCaseTypeLabel, type CaseStatus } from '@/lib/case-workflow'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
@@ -28,6 +30,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   }
 
   const caseItem = caseItemRaw as any /* eslint-disable-line @typescript-eslint/no-explicit-any */
+  const statusMeta = getCaseStatusMeta(caseItem.status)
+  const nextStatuses = getAllowedNextStatuses(caseItem.status as CaseStatus | null)
 
   return (
     <div className="space-y-6">
@@ -55,9 +59,33 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
                   Creata il: {new Date(caseItem.created_at!).toLocaleDateString('it-IT')}
                 </p>
               </div>
-              <span className="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 uppercase">
-                {caseItem.status!.replace('_', ' ')}
+              <span className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ring-1 ring-inset ${statusMeta.badgeClassName}`}>
+                {statusMeta.label}
               </span>
+            </div>
+            <div className="mt-4 grid grid-cols-1 gap-4 border-t border-gray-100 pt-4 sm:grid-cols-2">
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Tipo pratica</h3>
+                <p className="mt-1 text-sm font-semibold text-gray-900">{getCaseTypeLabel(caseItem.type)}</p>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Prossimi stati consentiti</h3>
+                {nextStatuses.length > 0 ? (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {nextStatuses.map((status) => {
+                      const nextStatusMeta = getCaseStatusMeta(status)
+
+                      return (
+                        <span key={status} className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${nextStatusMeta.badgeClassName}`}>
+                          {nextStatusMeta.label}
+                        </span>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="mt-1 text-sm text-gray-500">Nessuna transizione disponibile.</p>
+                )}
+              </div>
             </div>
             <div className="mt-4">
               <h3 className="text-sm font-medium text-gray-500">Descrizione</h3>
@@ -67,29 +95,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
             </div>
           </div>
 
-          {/* Documents Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-medium">Documenti Allegati</h2>
-              {/* In a fully functional app, this would be an actual file input form */}
-              <button className="text-sm text-blue-600 font-medium hover:text-blue-800">
-                + Carica Documento
-              </button>
-            </div>
-            
-            {!caseItem.documents || caseItem.documents.length === 0 ? (
-              <p className="text-sm text-gray-500">Nessun documento caricato per questa pratica.</p>
-            ) : (
-              <ul className="divide-y divide-gray-200 border-t border-gray-200">
-                {caseItem.documents.map((doc: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => (
-                  <li key={doc.id} className="py-3 flex justify-between items-center">
-                    <span className="text-sm font-medium">{doc.file_name}</span>
-                    <a href="#" className="text-sm text-blue-600 hover:underline">Scarica</a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <CaseDocuments caseId={caseItem.id} documents={caseItem.documents ?? []} />
         </div>
 
         {/* Sidebar Info */}

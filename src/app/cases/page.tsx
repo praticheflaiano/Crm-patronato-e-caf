@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { FolderKanban, Plus, Search } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
+import { getCaseStatusMeta, getCaseTypeLabel } from '@/lib/case-workflow'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 
@@ -68,23 +69,27 @@ export default async function CasesPage() {
                   </td>
                 </tr>
               ) : (
-                cases.map((caseItem: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => (
-                  <tr key={caseItem.id} className="hover:bg-slate-50">
-                    <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-slate-950">{caseItem.title}</td>
-                    <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-600">
-                      {caseItem.contacts ? `${caseItem.contacts.last_name} ${caseItem.contacts.first_name}` : 'N/D'}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-600">{caseItem.type.replace('_', ' ')}</td>
-                    <td className="whitespace-nowrap px-5 py-4">
-                      <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                        {caseItem.status.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold">
-                      <Link href={`/cases/${caseItem.id}`} className="text-blue-700 hover:text-blue-900">Dettagli</Link>
-                    </td>
-                  </tr>
-                ))
+                cases.map((caseItem: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
+                  const statusMeta = getCaseStatusMeta(caseItem.status)
+
+                  return (
+                    <tr key={caseItem.id} className="hover:bg-slate-50">
+                      <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-slate-950">{caseItem.title}</td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-600">
+                        {caseItem.contacts ? `${caseItem.contacts.last_name} ${caseItem.contacts.first_name}` : 'N/D'}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-600">{getCaseTypeLabel(caseItem.type)}</td>
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusMeta.badgeClassName}`}>
+                          {statusMeta.label}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold">
+                        <Link href={`/cases/${caseItem.id}`} className="text-blue-700 hover:text-blue-900">Dettagli</Link>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>

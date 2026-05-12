@@ -1,6 +1,15 @@
 import Link from 'next/link'
-import { ArrowLeft, Save } from 'lucide-react'
+import { Save, UserPlus } from 'lucide-react'
+import {
+  fieldClassName,
+  FormCard,
+  FormPageHeader,
+  labelClassName,
+  primaryButtonClassName,
+  secondaryButtonClassName,
+} from '@/components/forms/form-layout'
 import { SetupNotice } from '@/components/setup-notice'
+import { CASE_TYPES, CASE_TYPE_META } from '@/lib/case-workflow'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 import { createCase } from './actions'
@@ -16,64 +25,78 @@ export default async function NewCasePage() {
     .select('id, first_name, last_name, fiscal_code')
     .order('last_name', { ascending: true })
 
+  const hasContacts = Boolean(contacts?.length)
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <Link href="/cases" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900">
-          <ArrowLeft size={16} aria-hidden="true" />
-          Indietro
-        </Link>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">Nuova Pratica</h1>
-        <p className="mt-1 text-sm text-slate-500">Crea una nuova pratica e collegala a un contatto gia presente.</p>
-      </div>
+      <FormPageHeader
+        backHref="/cases"
+        title="Nuova pratica"
+        description="Crea una pratica CAF, patronato o invalidita civile e collegala a un contatto."
+      />
 
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 bg-slate-50 px-6 py-4">
-          <h2 className="text-sm font-semibold text-slate-900">Dati principali</h2>
-          <p className="mt-1 text-xs text-slate-500">I campi contrassegnati con * sono obbligatori.</p>
+      {!hasContacts ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-5 py-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-amber-900">Prima serve almeno un contatto</p>
+              <p className="mt-1 text-sm text-amber-800">
+                Le pratiche devono essere associate a un cliente gia registrato.
+              </p>
+            </div>
+            <Link href="/contacts/new" className={secondaryButtonClassName}>
+              <UserPlus size={16} aria-hidden="true" />
+              Nuovo contatto
+            </Link>
+          </div>
         </div>
+      ) : null}
 
+      <FormCard title="Dati principali" description="I campi contrassegnati con * sono obbligatori.">
         <form action={createCase} className="space-y-5 p-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-semibold text-slate-700">
-              Titolo Pratica *
+            <label htmlFor="title" className={labelClassName}>
+              Titolo pratica *
             </label>
             <input
               type="text"
               name="title"
               id="title"
               required
-              className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              placeholder="es. ISEE 2026, domanda NASpI, invalidita civile..."
+              placeholder="es. ISEE 2026, domanda NASpI, invalidita civile"
+              className={fieldClassName}
             />
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
-              <label htmlFor="type" className="block text-sm font-semibold text-slate-700">
-                Tipo di Pratica *
+              <label htmlFor="type" className={labelClassName}>
+                Tipo di pratica *
               </label>
               <select
                 name="type"
                 id="type"
                 required
-                className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className={fieldClassName}
               >
-                <option value="caf">CAF (es. ISEE, 730)</option>
-                <option value="patronato">Patronato (es. Pensione, Disoccupazione)</option>
-                <option value="invalidita_civile">Invalidita Civile</option>
+                {CASE_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {CASE_TYPE_META[type].label}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div>
-              <label htmlFor="contact_id" className="block text-sm font-semibold text-slate-700">
-                Contatto Associato *
+              <label htmlFor="contact_id" className={labelClassName}>
+                Contatto associato *
               </label>
               <select
                 name="contact_id"
                 id="contact_id"
                 required
-                className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                disabled={!hasContacts}
+                className={fieldClassName}
               >
                 <option value="">Seleziona un contatto...</option>
                 {contacts?.map((contact: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => (
@@ -86,34 +109,33 @@ export default async function NewCasePage() {
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-semibold text-slate-700">
-              Descrizione / Note iniziali
+            <label htmlFor="description" className={labelClassName}>
+              Descrizione / note iniziali
             </label>
             <textarea
               name="description"
               id="description"
               rows={5}
-              className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              placeholder="Annota documenti richiesti, scadenze o dettagli utili per avviare la pratica."
+              className={fieldClassName}
             />
           </div>
 
           <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
-            <Link
-              href="/cases"
-              className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
-            >
+            <Link href="/cases" className={secondaryButtonClassName}>
               Annulla
             </Link>
             <button
               type="submit"
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+              disabled={!hasContacts}
+              className={`${primaryButtonClassName} disabled:cursor-not-allowed disabled:bg-slate-300`}
             >
               <Save size={16} aria-hidden="true" />
-              Crea Pratica
+              Crea pratica
             </button>
           </div>
         </form>
-      </div>
+      </FormCard>
     </div>
   )
 }

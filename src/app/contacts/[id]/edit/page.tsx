@@ -1,6 +1,14 @@
 import Link from 'next/link'
-import { ArrowLeft, Save } from 'lucide-react'
+import { Save } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import {
+  fieldClassName,
+  FormCard,
+  FormPageHeader,
+  labelClassName,
+  primaryButtonClassName,
+  secondaryButtonClassName,
+} from '@/components/forms/form-layout'
 import { SetupNotice } from '@/components/setup-notice'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
@@ -27,63 +35,125 @@ export default async function EditContactPage({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <Link href={`/contacts/${id}`} className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900">
-          <ArrowLeft size={16} aria-hidden="true" />
-          Indietro
-        </Link>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">Modifica Contatto</h1>
-      </div>
+      <FormPageHeader
+        backHref={`/contacts/${id}`}
+        title="Modifica contatto"
+        description="Aggiorna anagrafica, recapiti e indirizzo del cliente."
+      />
 
-      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <form action={updateContact} className="space-y-5">
+      <FormCard title="Dati anagrafici" description="I campi contrassegnati con * sono obbligatori.">
+        <form action={updateContact} className="space-y-5 p-6">
           <input type="hidden" name="id" value={contact.id} />
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <div>
-              <label htmlFor="first_name" className="block text-sm font-semibold text-slate-700">Nome *</label>
-              <input id="first_name" name="first_name" required defaultValue={contact.first_name} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
-            </div>
-            <div>
-              <label htmlFor="last_name" className="block text-sm font-semibold text-slate-700">Cognome *</label>
-              <input id="last_name" name="last_name" required defaultValue={contact.last_name} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="fiscal_code" className="block text-sm font-semibold text-slate-700">Codice Fiscale *</label>
-            <input id="fiscal_code" name="fiscal_code" required defaultValue={contact.fiscal_code} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm uppercase shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
-          </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-slate-700">Email</label>
-              <input id="email" name="email" type="email" defaultValue={contact.email ?? ''} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+              <label htmlFor="first_name" className={labelClassName}>
+                Nome *
+              </label>
+              <input
+                id="first_name"
+                name="first_name"
+                required
+                defaultValue={contact.first_name}
+                placeholder="es. Maria"
+                className={fieldClassName}
+              />
             </div>
             <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-slate-700">Telefono</label>
-              <input id="phone" name="phone" defaultValue={contact.phone ?? ''} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+              <label htmlFor="last_name" className={labelClassName}>
+                Cognome *
+              </label>
+              <input
+                id="last_name"
+                name="last_name"
+                required
+                defaultValue={contact.last_name}
+                placeholder="es. Rossi"
+                className={fieldClassName}
+              />
             </div>
           </div>
 
           <div>
-            <label htmlFor="date_of_birth" className="block text-sm font-semibold text-slate-700">Data di nascita</label>
-            <input id="date_of_birth" name="date_of_birth" type="date" defaultValue={contact.date_of_birth ?? ''} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+            <label htmlFor="fiscal_code" className={labelClassName}>
+              Codice fiscale *
+            </label>
+            <input
+              id="fiscal_code"
+              name="fiscal_code"
+              required
+              defaultValue={contact.fiscal_code}
+              placeholder="es. RSSMRA80A01H501U"
+              className={`${fieldClassName} uppercase`}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div>
+              <label htmlFor="email" className={labelClassName}>
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                defaultValue={contact.email ?? ''}
+                placeholder="es. maria.rossi@email.it"
+                className={fieldClassName}
+              />
+            </div>
+            <div>
+              <label htmlFor="phone" className={labelClassName}>
+                Telefono
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                defaultValue={contact.phone ?? ''}
+                placeholder="es. 333 123 4567"
+                className={fieldClassName}
+              />
+            </div>
           </div>
 
           <div>
-            <label htmlFor="address" className="block text-sm font-semibold text-slate-700">Indirizzo</label>
-            <textarea id="address" name="address" rows={3} defaultValue={contact.address ?? ''} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+            <label htmlFor="date_of_birth" className={labelClassName}>
+              Data di nascita
+            </label>
+            <input
+              id="date_of_birth"
+              name="date_of_birth"
+              type="date"
+              defaultValue={contact.date_of_birth ?? ''}
+              className={fieldClassName}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="address" className={labelClassName}>
+              Indirizzo di residenza
+            </label>
+            <textarea
+              id="address"
+              name="address"
+              rows={3}
+              defaultValue={contact.address ?? ''}
+              placeholder="Via, numero civico, CAP, citta"
+              className={fieldClassName}
+            />
           </div>
 
           <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
-            <Link href={`/contacts/${id}`} className="rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Annulla</Link>
-            <button type="submit" className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+            <Link href={`/contacts/${id}`} className={secondaryButtonClassName}>
+              Annulla
+            </Link>
+            <button type="submit" className={primaryButtonClassName}>
               <Save size={16} aria-hidden="true" />
-              Salva
+              Salva modifiche
             </button>
           </div>
         </form>
-      </div>
+      </FormCard>
     </div>
   )
 }

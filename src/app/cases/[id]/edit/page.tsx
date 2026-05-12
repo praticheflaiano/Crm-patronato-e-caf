@@ -1,7 +1,16 @@
 import Link from 'next/link'
-import { ArrowLeft, Save } from 'lucide-react'
+import { Save } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import {
+  fieldClassName,
+  FormCard,
+  FormPageHeader,
+  labelClassName,
+  primaryButtonClassName,
+  secondaryButtonClassName,
+} from '@/components/forms/form-layout'
 import { SetupNotice } from '@/components/setup-notice'
+import { CASE_STATUS_META, CASE_TYPES, CASE_TYPE_META, getCaseStatusOptions, type CaseStatus } from '@/lib/case-workflow'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 import { updateCase } from './actions'
@@ -23,50 +32,58 @@ export default async function EditCasePage({ params }: { params: Promise<{ id: s
   }
 
   const caseItem = caseItemData as any /* eslint-disable-line @typescript-eslint/no-explicit-any */
+  const statusOptions = getCaseStatusOptions(caseItem.status as CaseStatus | null)
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <Link href={`/cases/${id}`} className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900">
-          <ArrowLeft size={16} aria-hidden="true" />
-          Indietro
-        </Link>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">Modifica Pratica</h1>
-      </div>
+      <FormPageHeader
+        backHref={`/cases/${id}`}
+        title="Modifica pratica"
+        description="Aggiorna dati principali, contatto collegato e stato di avanzamento."
+      />
 
-      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <form action={updateCase} className="space-y-5">
+      <FormCard title="Dati principali" description="Gli stati selezionabili rispettano il flusso operativo configurato.">
+        <form action={updateCase} className="space-y-5 p-6">
           <input type="hidden" name="id" value={caseItem.id} />
 
           <div>
-            <label htmlFor="title" className="block text-sm font-semibold text-slate-700">Titolo *</label>
-            <input id="title" name="title" required defaultValue={caseItem.title} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+            <label htmlFor="title" className={labelClassName}>Titolo pratica *</label>
+            <input
+              id="title"
+              name="title"
+              required
+              defaultValue={caseItem.title}
+              placeholder="es. ISEE 2026, domanda NASpI, invalidita civile"
+              className={fieldClassName}
+            />
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
-              <label htmlFor="type" className="block text-sm font-semibold text-slate-700">Tipo *</label>
-              <select id="type" name="type" required defaultValue={caseItem.type} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                <option value="caf">CAF</option>
-                <option value="patronato">Patronato</option>
-                <option value="invalidita_civile">Invalidita Civile</option>
+              <label htmlFor="type" className={labelClassName}>Tipo di pratica *</label>
+              <select id="type" name="type" required defaultValue={caseItem.type} className={fieldClassName}>
+                {CASE_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {CASE_TYPE_META[type].label}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
-              <label htmlFor="status" className="block text-sm font-semibold text-slate-700">Stato *</label>
-              <select id="status" name="status" required defaultValue={caseItem.status ?? 'open'} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-                <option value="open">Aperta</option>
-                <option value="in_progress">In lavorazione</option>
-                <option value="pending_documents">Documenti mancanti</option>
-                <option value="completed">Completata</option>
-                <option value="rejected">Respinta</option>
+              <label htmlFor="status" className={labelClassName}>Stato *</label>
+              <select id="status" name="status" required defaultValue={caseItem.status ?? 'open'} className={fieldClassName}>
+                {statusOptions.map((status) => (
+                  <option key={status} value={status}>
+                    {CASE_STATUS_META[status].label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
           <div>
-            <label htmlFor="contact_id" className="block text-sm font-semibold text-slate-700">Contatto *</label>
-            <select id="contact_id" name="contact_id" required defaultValue={caseItem.contact_id ?? ''} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+            <label htmlFor="contact_id" className={labelClassName}>Contatto associato *</label>
+            <select id="contact_id" name="contact_id" required defaultValue={caseItem.contact_id ?? ''} className={fieldClassName}>
               <option value="">Seleziona un contatto...</option>
               {contacts?.map((contact: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => (
                 <option key={contact.id} value={contact.id}>
@@ -77,19 +94,28 @@ export default async function EditCasePage({ params }: { params: Promise<{ id: s
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-semibold text-slate-700">Descrizione</label>
-            <textarea id="description" name="description" rows={5} defaultValue={caseItem.description ?? ''} className="mt-2 block w-full rounded-md border border-slate-300 px-3 py-2.5 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+            <label htmlFor="description" className={labelClassName}>Descrizione / note</label>
+            <textarea
+              id="description"
+              name="description"
+              rows={5}
+              defaultValue={caseItem.description ?? ''}
+              placeholder="Annota documenti richiesti, scadenze o dettagli utili per la lavorazione."
+              className={fieldClassName}
+            />
           </div>
 
           <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
-            <Link href={`/cases/${id}`} className="rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Annulla</Link>
-            <button type="submit" className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+            <Link href={`/cases/${id}`} className={secondaryButtonClassName}>
+              Annulla
+            </Link>
+            <button type="submit" className={primaryButtonClassName}>
               <Save size={16} aria-hidden="true" />
-              Salva
+              Salva modifiche
             </button>
           </div>
         </form>
-      </div>
+      </FormCard>
     </div>
   )
 }
