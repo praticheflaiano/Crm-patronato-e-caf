@@ -71,7 +71,7 @@ export default async function ContactsPage() {
                     <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-600">{contact.email || '-'}</td>
                     <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-600">{contact.phone || '-'}</td>
                     <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold">
-                      <span className="text-slate-400">Modifica</span>
+                      <Link href={`/contacts/${contact.id}`} className="text-blue-700 hover:text-blue-900">Dettagli</Link>
                     </td>
                   </tr>
                 ))

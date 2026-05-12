@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Edit } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
@@ -30,11 +31,17 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Link href="/cases" className="text-gray-500 hover:text-gray-700">
-          &larr; Indietro alle Pratiche
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <Link href="/cases" className="text-sm font-medium text-slate-500 hover:text-slate-900">
+            &larr; Indietro alle Pratiche
+          </Link>
+          <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">Dettaglio Pratica</h1>
+        </div>
+        <Link href={`/cases/${caseItem.id}/edit`} className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+          <Edit size={16} aria-hidden="true" />
+          Modifica
         </Link>
-        <h1 className="text-2xl font-bold">Dettaglio Pratica</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -95,7 +102,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
                 <p><strong>CF:</strong> {caseItem.contacts.fiscal_code}</p>
                 {caseItem.contacts.email && <p><strong>Email:</strong> {caseItem.contacts.email}</p>}
                 {caseItem.contacts.phone && <p><strong>Telefono:</strong> {caseItem.contacts.phone}</p>}
-                <Link href={`/contacts`} className="text-blue-600 hover:underline mt-2 inline-block">
+                <Link href={`/contacts/${caseItem.contacts.id}`} className="text-blue-600 hover:underline mt-2 inline-block">
                   Vedi profilo completo &rarr;
                 </Link>
               </div>

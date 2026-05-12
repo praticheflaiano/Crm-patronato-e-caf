@@ -9,6 +9,52 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      organizations: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          created_at?: string | null
+        }
+      }
+      profiles: {
+        Row: {
+          id: string
+          organization_id: string
+          full_name: string | null
+          role: 'admin' | 'operator' | 'collaborator' | 'doctor'
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          organization_id: string
+          full_name?: string | null
+          role?: 'admin' | 'operator' | 'collaborator' | 'doctor'
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          full_name?: string | null
+          role?: 'admin' | 'operator' | 'collaborator' | 'doctor'
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
       contacts: {
         Row: {
           id: string
@@ -22,6 +68,7 @@ export interface Database {
           created_at: string | null
           updated_at: string | null
           user_id: string | null
+          organization_id: string
         }
         Insert: {
           id?: string
@@ -35,6 +82,7 @@ export interface Database {
           created_at?: string | null
           updated_at?: string | null
           user_id?: string | null
+          organization_id?: string
         }
         Update: {
           id?: string
@@ -48,6 +96,7 @@ export interface Database {
           created_at?: string | null
           updated_at?: string | null
           user_id?: string | null
+          organization_id?: string
         }
       }
       cases: {
@@ -61,6 +110,7 @@ export interface Database {
           created_at: string | null
           updated_at: string | null
           assigned_to: string | null
+          organization_id: string
         }
         Insert: {
           id?: string
@@ -72,6 +122,7 @@ export interface Database {
           created_at?: string | null
           updated_at?: string | null
           assigned_to?: string | null
+          organization_id?: string
         }
         Update: {
           id?: string
@@ -83,6 +134,7 @@ export interface Database {
           created_at?: string | null
           updated_at?: string | null
           assigned_to?: string | null
+          organization_id?: string
         }
       }
       documents: {
@@ -97,6 +149,7 @@ export interface Database {
           created_at: string | null
           uploaded_by: string | null
           document_embedding: string | null // Vector type is usually represented as string in generic types or array of numbers
+          organization_id: string
         }
         Insert: {
           id?: string
@@ -109,6 +162,7 @@ export interface Database {
           created_at?: string | null
           uploaded_by?: string | null
           document_embedding?: string | null
+          organization_id?: string
         }
         Update: {
           id?: string
@@ -121,6 +175,7 @@ export interface Database {
           created_at?: string | null
           uploaded_by?: string | null
           document_embedding?: string | null
+          organization_id?: string
         }
       }
       tasks: {
@@ -134,6 +189,7 @@ export interface Database {
           created_at: string | null
           updated_at: string | null
           assigned_to: string | null
+          organization_id: string
         }
         Insert: {
           id?: string
@@ -145,6 +201,7 @@ export interface Database {
           created_at?: string | null
           updated_at?: string | null
           assigned_to?: string | null
+          organization_id?: string
         }
         Update: {
           id?: string
@@ -156,6 +213,7 @@ export interface Database {
           created_at?: string | null
           updated_at?: string | null
           assigned_to?: string | null
+          organization_id?: string
         }
       }
       medical_certificates: {
@@ -169,6 +227,7 @@ export interface Database {
           document_id: string | null
           created_at: string | null
           updated_at: string | null
+          organization_id: string
         }
         Insert: {
           id?: string
@@ -180,6 +239,7 @@ export interface Database {
           document_id?: string | null
           created_at?: string | null
           updated_at?: string | null
+          organization_id?: string
         }
         Update: {
           id?: string
@@ -191,6 +251,7 @@ export interface Database {
           document_id?: string | null
           created_at?: string | null
           updated_at?: string | null
+          organization_id?: string
         }
       }
     }
@@ -203,6 +264,7 @@ export interface Database {
     Enums: {
       case_status: 'open' | 'in_progress' | 'pending_documents' | 'completed' | 'rejected'
       case_type: 'caf' | 'patronato' | 'invalidita_civile'
+      user_role: 'admin' | 'operator' | 'collaborator' | 'doctor'
     }
     CompositeTypes: {
       [_ in never]: never
