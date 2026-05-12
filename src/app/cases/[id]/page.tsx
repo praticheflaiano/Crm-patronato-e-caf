@@ -107,9 +107,9 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex justify-between items-center mb-4">
                <h2 className="text-lg font-medium">Task</h2>
-               <button className="text-sm text-blue-600 font-medium hover:text-blue-800">
+               <Link href={`/cases/${id}/tasks/new`} className="text-sm text-blue-600 font-medium hover:text-blue-800">
                 + Aggiungi
-              </button>
+              </Link>
             </div>
             {!caseItem.tasks || caseItem.tasks.length === 0 ? (
               <p className="text-sm text-gray-500">Nessun task per questa pratica.</p>
