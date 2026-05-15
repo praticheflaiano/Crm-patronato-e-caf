@@ -216,6 +216,38 @@ export interface Database {
           organization_id?: string
         }
       }
+      notes: {
+        Row: {
+          id: string
+          case_id: string | null
+          content: string
+          is_private: boolean | null
+          created_at: string | null
+          updated_at: string | null
+          created_by: string | null
+          organization_id: string
+        }
+        Insert: {
+          id?: string
+          case_id?: string | null
+          content: string
+          is_private?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+          organization_id?: string
+        }
+        Update: {
+          id?: string
+          case_id?: string | null
+          content?: string
+          is_private?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+          organization_id?: string
+        }
+      }
       medical_certificates: {
         Row: {
           id: string

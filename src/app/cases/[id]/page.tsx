@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { Edit } from 'lucide-react'
 import { CaseDocuments } from '@/components/documents/case-documents'
+import { CaseTasks } from '@/components/cases/case-tasks'
+import { CaseNotes } from '@/components/cases/case-notes'
 import { SetupNotice } from '@/components/setup-notice'
 import { getAllowedNextStatuses, getCaseStatusMeta, getCaseTypeLabel, type CaseStatus } from '@/lib/case-workflow'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
@@ -14,13 +16,19 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
 
   const { id } = await params; const supabase = await createClient()
 
+  const { data: userData } = await supabase.auth.getUser()
+
   const { data: caseItemRaw, error } = await supabase
     .from('cases')
     .select(`
       *,
       contacts (*),
       documents (*),
-      tasks (*)
+      tasks (*),
+      notes (
+        *,
+        profiles:created_by (full_name)
+      )
     `)
     .eq('id', id)
     .single()
@@ -117,26 +125,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex justify-between items-center mb-4">
-               <h2 className="text-lg font-medium">Task</h2>
-               <button className="text-sm text-blue-600 font-medium hover:text-blue-800">
-                + Aggiungi
-              </button>
-            </div>
-            {!caseItem.tasks || caseItem.tasks.length === 0 ? (
-              <p className="text-sm text-gray-500">Nessun task per questa pratica.</p>
-            ) : (
-              <ul className="space-y-2">
-                {caseItem.tasks.map((task: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => (
-                   <li key={task.id} className="flex items-center space-x-2 text-sm">
-                     <input type="checkbox" defaultChecked={task.is_completed} disabled />
-                     <span className={task.is_completed ? 'line-through text-gray-400' : ''}>{task.title}</span>
-                   </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <CaseTasks caseId={caseItem.id} tasks={[...(caseItem.tasks || [])].sort((a: { created_at: string }, b: { created_at: string }) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())} />
+          <CaseNotes caseId={caseItem.id} notes={[...(caseItem.notes || [])].sort((a: { created_at: string }, b: { created_at: string }) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())} currentUserId={userData.user?.id || ''} />
         </div>
       </div>
     </div>

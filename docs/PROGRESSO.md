@@ -77,7 +77,7 @@ Ultimo aggiornamento: 2026-05-12
 2. CRUD completo contatti e pratiche. Base completata.
 3. Pipeline pratiche e stati strutturati. Base completata.
 4. Documenti con upload/download privato. Base completata.
-5. Task e note. Da fare.
+5. Task e note. Completato.
 6. RLS avanzata per admin, operatori, collaboratori e medici. Da fare.
 7. Modulo Invalidita Civile. Da fare.
 8. Knowledge base. Da fare.
@@ -89,14 +89,15 @@ Ultimo aggiornamento: 2026-05-12
 - Worker Pipeline: stati pratica, label, badge e flusso avanzamento. Integrato.
 - Worker Documenti: upload su bucket `documents`, metadati e signed URL. Integrato.
 - Worker UX CRUD: uniformare form e stati vuoti. Integrato.
+- Worker Task e Note: completata la gestione dei task e delle note (con privacy) all'interno delle pratiche. Integrato.
 
 ## Prossimo obiettivo operativo
 
 Integrare i risultati dei worker in questo ordine:
 
-1. Task e note su pratica.
-2. RLS avanzata per collaboratori e medici.
-3. Modulo Invalidita Civile.
+1. RLS avanzata per collaboratori e medici.
+2. Modulo Invalidita Civile.
+3. Knowledge base.
 
 ## Comandi di verifica
 
