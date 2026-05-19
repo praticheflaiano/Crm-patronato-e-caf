@@ -178,6 +178,35 @@ export interface Database {
           organization_id?: string
         }
       }
+      case_notes: {
+        Row: {
+          id: string
+          case_id: string | null
+          content: string
+          created_at: string | null
+          updated_at: string | null
+          author_id: string | null
+          organization_id: string | null
+        }
+        Insert: {
+          id?: string
+          case_id?: string | null
+          content: string
+          created_at?: string | null
+          updated_at?: string | null
+          author_id?: string | null
+          organization_id?: string | null
+        }
+        Update: {
+          id?: string
+          case_id?: string | null
+          content?: string
+          created_at?: string | null
+          updated_at?: string | null
+          author_id?: string | null
+          organization_id?: string | null
+        }
+      }
       tasks: {
         Row: {
           id: string
