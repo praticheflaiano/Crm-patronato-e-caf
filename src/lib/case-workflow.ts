@@ -75,6 +75,46 @@ export const CASE_STATUS_TRANSITIONS = {
   rejected: [],
 } satisfies Record<CaseStatus, readonly CaseStatus[]>
 
+export function validateStatusTransition(
+  currentStatus: CaseStatus | null,
+  newStatus: CaseStatus
+): boolean {
+  if (!currentStatus) return newStatus === 'open'
+  const transitions = CASE_STATUS_TRANSITIONS as Record<string, readonly string[]>
+  return transitions[currentStatus]?.includes(newStatus) ?? false
+}
+
+export async function handleStatusChange(
+  caseId: string,
+  newStatus: CaseStatus,
+  userId: string,
+  organizationId: string
+): Promise<void> {
+  // Create relevant tasks based on status change
+  switch (newStatus) {
+    case 'pending_documents':
+      await createTask({
+        case_id: caseId,
+        title: 'Richiedi documenti mancanti',
+        description: 'Contattare il cittadino per richiedere i documenti necessari',
+        assigned_to: userId,
+        organization_id: organizationId,
+      })
+      break
+    case 'in_progress':
+      await createTask({
+        case_id: caseId,
+        title: 'Gestisci pratica',
+        description: 'Procedere con la gestione della pratica',
+        assigned_to: userId,
+        organization_id: organizationId,
+      })
+      break
+  }
+
+  // TODO: Add notification system integration
+}
+
 function formatUnknownValue(value: string | null | undefined) {
   if (!value) {
     return 'N/D'
@@ -116,7 +156,24 @@ export function getAllowedNextStatuses(status: CaseStatus | null | undefined): r
     return ['open']
   }
 
-  return CASE_STATUS_TRANSITIONS[status]
+  return (CASE_STATUS_TRANSITIONS as Record<string, readonly CaseStatus[]>)[status]
+}
+
+// Helper type for task creation
+interface TaskInput {
+  case_id: string | null
+  title: string
+  description: string | null
+  assigned_to: string | null
+  organization_id: string
+}
+
+// Mock task creation function - should be replaced with actual implementation
+async function createTask(task: TaskInput): Promise<void> {
+  // In a real implementation, this would call your task service
+  console.log('Creating task:', task)
+  // Example implementation using Supabase:
+  // await supabase.from('tasks').insert(task)
 }
 
 export function getCaseStatusOptions(currentStatus: CaseStatus | null | undefined) {

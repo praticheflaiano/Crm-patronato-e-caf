@@ -2,11 +2,12 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Link from 'next/link'
-import { ClipboardList, FolderKanban, Home, LogOut, MessageSquare, Users } from 'lucide-react'
+import { ClipboardList, FolderKanban, Home, LogOut, MessageSquare, Users, Stethoscope } from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { formatRole, getOrCreateUserProfile } from '@/lib/user-profile'
 import { logout } from './login/actions'
+import NotificationBell from '@/components/notifications/NotificationBell'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -54,10 +55,20 @@ export default async function RootLayout({
                   <FolderKanban size={17} aria-hidden="true" />
                   Pratiche
                 </Link>
+                <Link href="/invalidita-civile" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950">
+                  <FolderKanban size={17} aria-hidden="true" />
+                  Invalidità Civile
+                </Link>
                 <Link href="/chat" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950">
                   <MessageSquare size={17} aria-hidden="true" />
                   Assistente AI
                 </Link>
+                {profile?.role === 'doctor' && (
+                  <Link href="/medico/dashboard" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-purple-700 hover:bg-purple-50 hover:text-purple-900">
+                    <Stethoscope size={17} aria-hidden="true" />
+                    Dashboard Medico
+                  </Link>
+                )}
               </nav>
               <div className="border-t border-slate-200 p-4">
                 <div className="mb-3 rounded-md bg-slate-50 p-3">
@@ -82,6 +93,9 @@ export default async function RootLayout({
                 <div>
                   <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">{profile?.organization_name ?? 'CRM System'}</h2>
                   <p className="text-xs text-slate-400">Gestione operativa pratiche e clienti</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <NotificationBell />
                 </div>
               </header>
               <main className="flex-1 overflow-y-auto bg-slate-50 p-8">
