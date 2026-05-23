@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { Database } from '@/types/database'
 import { getSupabasePublishableKey, getSupabaseUrl } from './config'
@@ -36,26 +37,20 @@ export async function createClient() {
   )
 }
 
-// Function specifically for admin tasks that require the service role key
-// IMPORTANT: Never expose NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY to the browser
-export async function createAdminClient() {
-    const supabaseUrl = getSupabaseUrl()
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+// Admin client using service role key — never expose to browser
+export function createAdminClient() {
+  const supabaseUrl = getSupabaseUrl()
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-    if (!supabaseUrl || !serviceRoleKey) {
-        throw new Error('Supabase admin environment variables are not configured')
-    }
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase admin environment variables are not configured')
+  }
 
-    return createServerClient<Database>(
-        supabaseUrl,
-        serviceRoleKey,
-        {
-          cookies: {
-            getAll() {
-              return [] // Admin client usually doesn't need user cookies
-            },
-            setAll() {},
-          },
-        }
-      )
+  // Direct Supabase client (not SSR) — needed for .auth.admin methods
+  return createSupabaseClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  })
 }
