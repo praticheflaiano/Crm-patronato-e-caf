@@ -1,45 +1,50 @@
-import { sendAdminMagicLink } from './actions'
-import Link from 'next/link'
+import { createAdminClient } from '@/utils/supabase/server'
 
-export default async function AccessPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ registered?: string }>
-}) {
-  const params = await searchParams
+const ADMIN_EMAIL = 'praticheflaiano@gmail.com'
+
+export default async function AccessPage() {
+  const supabaseAdmin = createAdminClient()
+
+  const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+    type: 'magiclink',
+    email: ADMIN_EMAIL,
+  })
+
+  const errorMsg = error?.message ?? (!data?.properties?.action_link ? 'No link generated' : null)
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-      <div className="bg-white rounded-lg border shadow-sm p-8 max-w-md w-full">
-        <h1 className="text-2xl font-bold text-slate-950 text-center">Accesso diretto CRM</h1>
-        <p className="mt-4 text-slate-600 text-center text-sm">
-          Clicca il pulsante qui sotto per ricevere un <strong>magic link</strong> alla tua email 
-          (<code className="bg-slate-100 px-1 rounded">praticheflaiano@gmail.com</code>) 
-          e accedere direttamente al CRM.
-        </p>
-
-        {params.registered === '1' && (
-          <div className="mt-4 rounded-md bg-green-50 border border-green-200 p-3 text-sm text-green-700">
-            ✅ Registration successful! Check your email to confirm your account, then click the button below to login.
-          </div>
+    <main className="flex min-h-screen items-center justify-center bg-slate-100">
+      <div className="bg-white rounded-lg border p-8 text-center max-w-md w-full">
+        {errorMsg ? (
+          <>
+            <h1 className="text-xl font-bold text-red-600">Errore</h1>
+            <p className="mt-2 text-slate-600">{errorMsg}</p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-xl font-bold text-slate-950">Login in corso...</h1>
+            <p className="mt-2 text-sm text-slate-500">Stiamo autenticando il tuo account. Non chiudere questa pagina.</p>
+          </>
         )}
-
-        <div className="mt-6">
-          <form action={sendAdminMagicLink}>
-            <button
-              type="submit"
-              className="w-full inline-flex items-center justify-center rounded-md bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
-            >
-              Invia magic link e accedi
-            </button>
-          </form>
-        </div>
-
-        <div className="mt-4 text-center">
-          <Link href="/login" className="text-sm text-blue-600 hover:underline">
-            ← Torna al login normale
-          </Link>
-        </div>
+        <p className="mt-4 text-xs text-slate-400">Centro Pratiche Flaiano CRM</p>
+        <script dangerouslySetInnerHTML={{ __html: `
+          try {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+            if (!token) throw new Error('No token in URL');
+            import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm').then(({createClient}) => {
+              const supabase = createClient(
+                'https://xjchklrrmyavizozhtpb.supabase.co',
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2hrbHJteW12aW96aHRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NzYzMDcsImV4cCI6MjA5NDE1MjMwN30.-jwzje0VXfmysMIff5yV_iYbpd7ndw1YEtM4Les30ok'
+              );
+              supabase.auth.verifyOtp({ email: 'praticheflaiano@gmail.com', token: token, type: 'magiclink' })
+                .then(({error}) => { if (error) throw error; window.location.href = '/'; })
+                .catch(err => { document.querySelector('p').textContent = 'Errore: ' + err.message; });
+            });
+          } catch(err) {
+            document.querySelector('p').textContent = 'Errore: ' + err.message;
+          }
+        ` }} />
       </div>
     </main>
   )
