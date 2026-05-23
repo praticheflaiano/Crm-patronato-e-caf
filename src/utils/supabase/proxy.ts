@@ -29,18 +29,21 @@ export async function updateSession(request: NextRequest) {
     },
   })
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // Check for session cookie (doesn't require network call)
+  const sessionCookie = request.cookies.get('sb-access-token')
+  const isAuthenticated = Boolean(sessionCookie?.value)
 
   const isPublicRoute = PUBLIC_ROUTES.some(route => request.nextUrl.pathname.startsWith(route))
 
-  // Allow /access bypass for testing
-  if (!user && !isPublicRoute) {
+  // If no session cookie and not a public route, redirect to login
+  if (!isAuthenticated && !isPublicRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  if (user && request.nextUrl.pathname.startsWith('/login')) {
+  // If authenticated but on login page, go to dashboard
+  if (isAuthenticated && request.nextUrl.pathname.startsWith('/login')) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
