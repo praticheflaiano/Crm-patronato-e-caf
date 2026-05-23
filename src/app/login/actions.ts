@@ -20,9 +20,7 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    // In a real app, you'd want to return this error to the UI
-    // rather than redirecting to a generic error page
-    redirect('/error')
+    redirect('/error?reason=login_failed')
   }
 
   revalidatePath('/', 'layout')
@@ -36,19 +34,27 @@ export async function signup(formData: FormData) {
 
   const supabase = await createClient()
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
+  const fullName = formData.get('full_name') as string
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
 
-  const { error } = await supabase.auth.signUp(data)
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+      },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('/rest/v1', '')}/login`,
+    },
+  })
 
   if (error) {
-    redirect('/error')
+    redirect('/error?reason=signup_failed')
   }
 
   revalidatePath('/', 'layout')
-  redirect('/')
+  redirect('/login?registered=1')
 }
 
 export async function logout() {
@@ -58,7 +64,7 @@ export async function logout() {
 
   const supabase = await createClient()
   await supabase.auth.signOut()
-  
+
   revalidatePath('/', 'layout')
   redirect('/login')
 }

@@ -1,4 +1,4 @@
-import { ClipboardList, Lock, Mail } from 'lucide-react'
+import { ClipboardList, Lock, Mail, User } from 'lucide-react'
 import { login, signup } from './actions'
 
 export default function LoginPage() {
@@ -43,7 +43,7 @@ export default function LoginPage() {
                   autoComplete="email"
                   required
                   className="block w-full rounded-md border border-slate-300 py-2.5 pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  placeholder="praticheflaiano@gmail.com"
+                  placeholder=" tua@email.com "
                 />
               </div>
             </div>
@@ -73,6 +73,76 @@ export default function LoginPage() {
               >
                 Accedi
               </button>
+            </div>
+          </form>
+
+          <div className="relative mt-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-4 text-slate-500">Nuovo account?</span>
+            </div>
+          </div>
+
+          <form className="mt-6 space-y-4">
+            <div>
+              <label htmlFor="reg-name" className="block text-sm font-semibold text-slate-700">
+                Nome e Cognome
+              </label>
+              <div className="relative mt-2">
+                <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} aria-hidden="true" />
+                <input
+                  id="reg-name"
+                  name="full_name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  minLength={2}
+                  className="block w-full rounded-md border border-slate-300 py-2.5 pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder=" Mario Rossi "
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="reg-email" className="block text-sm font-semibold text-slate-700">
+                Email
+              </label>
+              <div className="relative mt-2">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} aria-hidden="true" />
+                <input
+                  id="reg-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="block w-full rounded-md border border-slate-300 py-2.5 pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder=" tua@email.com "
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="reg-password" className="block text-sm font-semibold text-slate-700">
+                Password
+              </label>
+              <div className="relative mt-2">
+                <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} aria-hidden="true" />
+                <input
+                  id="reg-password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  className="block w-full rounded-md border border-slate-300 py-2.5 pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder="Minimo 6 caratteri"
+                />
+              </div>
+            </div>
+
+            <div>
               <button
                 formAction={signup}
                 className="inline-flex w-full items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
