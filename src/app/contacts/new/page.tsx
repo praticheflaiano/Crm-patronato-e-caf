@@ -26,8 +26,8 @@ export default function NewContactPage() {
       />
 
       <FormCard title="Dati anagrafici" description="I campi contrassegnati con * sono obbligatori.">
-        <form action={createContact} className="space-y-5 p-6">
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <form action={createContact} className="space-y-5 p-4 sm:p-6">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
               <label htmlFor="first_name" className={labelClassName}>
                 Nome *
@@ -70,7 +70,7 @@ export default function NewContactPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
               <label htmlFor="email" className={labelClassName}>
                 Email
@@ -117,7 +117,7 @@ export default function NewContactPage() {
             />
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
+          <div className="flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
             <Link href="/contacts" className={secondaryButtonClassName}>
               Annulla
             </Link>

@@ -35,8 +35,8 @@ export default async function NewInvaliditaCasePage() {
       />
 
       {!hasContacts ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-5 py-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-amber-900">Prima serve almeno un contatto</p>
               <p className="mt-1 text-sm text-amber-800">
@@ -55,7 +55,7 @@ export default async function NewInvaliditaCasePage() {
         title="Dati principali" 
         description="I campi contrassegnati con * sono obbligatori."
       >
-        <form action={createInvaliditaCase} className="space-y-5 p-6">
+        <form action={createInvaliditaCase} className="space-y-5 p-4 sm:p-6">
           <div>
             <label htmlFor="title" className={labelClassName}>
               Titolo pratica *
@@ -97,7 +97,7 @@ export default async function NewInvaliditaCasePage() {
             <textarea
               name="description"
               id="description"
-              rows={5}
+              rows={4}
               placeholder="Annota documenti richiesti, scadenze o dettagli utili per avviare la pratica."
               className={fieldClassName}
             />
@@ -110,7 +110,7 @@ export default async function NewInvaliditaCasePage() {
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
+          <div className="flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
             <Link href="/invalidita-civile" className={secondaryButtonClassName}>
               Annulla
             </Link>

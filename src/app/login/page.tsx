@@ -3,17 +3,17 @@ import { login, signup } from './actions'
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm md:grid-cols-[1.05fr_0.95fr]">
-        <section className="bg-slate-950 px-8 py-10 text-white md:px-10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
+    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
+      <div className="w-full max-w-xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <section className="bg-slate-950 px-6 py-8 text-white sm:px-8">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
             <ClipboardList size={24} aria-hidden="true" />
           </div>
-          <h1 className="mt-8 text-3xl font-bold tracking-tight">Centro Flaiano CRM</h1>
+          <h1 className="mt-6 text-2xl font-bold tracking-tight sm:text-3xl">Centro Flaiano CRM</h1>
           <p className="mt-3 max-w-md text-sm leading-6 text-slate-300">
             Gestione operativa per contatti, pratiche CAF e patronato, documenti e scadenze.
           </p>
-          <div className="mt-10 grid gap-3 text-sm text-slate-300">
+          <div className="mt-8 space-y-3 text-sm text-slate-300">
             <div className="rounded-md border border-white/10 bg-white/5 p-4">
               Pratiche e contatti in un unico spazio di lavoro.
             </div>
@@ -23,13 +23,13 @@ export default function LoginPage() {
           </div>
         </section>
 
-        <section className="px-8 py-10 md:px-10">
+        <section className="px-6 py-8 sm:px-8">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-950">Accedi</h2>
+            <h2 className="text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">Accedi</h2>
             <p className="mt-2 text-sm text-slate-500">Inserisci le credenziali del tuo account.</p>
           </div>
 
-          <form className="mt-8 space-y-5">
+          <form className="mt-6 space-y-4">
             <div>
               <label htmlFor="email-address" className="block text-sm font-semibold text-slate-700">
                 Email
@@ -66,7 +66,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="grid gap-3 pt-2">
+            <div className="pt-2">
               <button
                 formAction={login}
                 className="inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
@@ -76,7 +76,7 @@ export default function LoginPage() {
             </div>
           </form>
 
-          <div className="relative mt-8">
+          <div className="relative mt-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-200" />
             </div>

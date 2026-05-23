@@ -40,8 +40,8 @@ type MedicalCertificateFormProps = {
 const CERTIFICATE_TYPES = [
   { value: 'hinch_60', label: 'Certificato INAIL 600 (ex L. 33/80)' },
   { value: 'hinch_65', label: 'Certificato INAIL 65 (ex L. 33/80)' },
-  { value: '剖_70', label: 'Certificato 70 (Patologie specifiche)' },
-  { value: '剖_104', label: 'Certificato Legge 104/92' },
+  { value: 'cert_70', label: 'Certificato 70 (Patologie specifiche)' },
+  { value: 'cert_104', label: 'Certificato Legge 104/92' },
   { value: 'altro', label: 'Altro certificato' },
 ]
 

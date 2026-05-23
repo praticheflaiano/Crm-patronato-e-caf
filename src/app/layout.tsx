@@ -8,6 +8,7 @@ import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { formatRole, getOrCreateUserProfile } from '@/lib/user-profile'
 import { logout } from './login/actions'
 import NotificationBell from '@/components/notifications/NotificationBell'
+import { MobileMenu } from '@/components/mobile-menu'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,9 +31,25 @@ export default async function RootLayout({
   return (
     <html lang="it">
       <body className={`${inter.className} bg-gray-50 text-gray-900 antialiased`}>
+        <MobileMenu />
         {isConfigured && user ? (
           <div className="flex min-h-screen overflow-hidden bg-slate-100">
-            <aside className="flex w-72 shrink-0 flex-col border-r border-slate-200 bg-white">
+            {/* Mobile menu button - hamburger */}
+            <button
+              id="mobile-menu-btn"
+              className="fixed top-4 left-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white shadow-lg md:hidden"
+              aria-label="Apri menu di navigazione"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            {/* Mobile overlay */}
+            <div id="mobile-overlay" className="fixed inset-0 z-40 hidden bg-black/50 md:hidden" />
+
+            {/* Sidebar - transforms to drawer on mobile */}
+            <aside id="sidebar" className="fixed inset-y-0 left-0 z-50 flex w-72 shrink-0 flex-col border-r border-slate-200 bg-white translate-x-[-100%] transition-transform duration-300 md:relative md:translate-x-0">
               <div className="flex h-20 items-center gap-3 border-b border-slate-200 px-6">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white">
                   <ClipboardList size={21} aria-hidden="true" />
@@ -89,7 +106,7 @@ export default async function RootLayout({
             </aside>
 
             <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-              <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8">
+              <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 pl-16 md:pl-8 md:px-8">
                 <div>
                   <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">{profile?.organization_name ?? 'CRM System'}</h2>
                   <p className="text-xs text-slate-400">Gestione operativa pratiche e clienti</p>
@@ -98,7 +115,7 @@ export default async function RootLayout({
                   <NotificationBell />
                 </div>
               </header>
-              <main className="flex-1 overflow-y-auto bg-slate-50 p-8">
+              <main className="flex-1 overflow-y-auto bg-slate-50 p-4 md:p-8">
                 {children}
               </main>
             </div>

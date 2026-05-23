@@ -7,13 +7,22 @@ export async function GET(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
+  }
+  
   const { data, error } = await supabase
     .from('tasks')
     .select('*')
     .eq('id', id)
     .single()
   
-  if (error) return NextResponse.json({ error }, { status: 500 })
+  if (error) {
+    console.error('Error fetching task:', error)
+    return NextResponse.json({ error: 'Task non trovato' }, { status: 404 })
+  }
   return NextResponse.json(data)
 }
 
@@ -23,6 +32,12 @@ export async function PATCH(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
+  }
+  
   const updateData = await request.json()
   const { data, error } = await supabase
     .from('tasks')
@@ -30,7 +45,10 @@ export async function PATCH(
     .eq('id', id)
     .select()
   
-  if (error) return NextResponse.json({ error }, { status: 500 })
+  if (error) {
+    console.error('Error updating task:', error)
+    return NextResponse.json({ error: 'Errore aggiornamento task' }, { status: 500 })
+  }
   return NextResponse.json(data)
 }
 
@@ -40,8 +58,17 @@ export async function DELETE(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
+  }
+  
   const { error } = await supabase.from('tasks').delete().eq('id', id)
   
-  if (error) return NextResponse.json({ error }, { status: 500 })
+  if (error) {
+    console.error('Error deleting task:', error)
+    return NextResponse.json({ error: 'Errore eliminazione task' }, { status: 500 })
+  }
   return NextResponse.json({ status: 'success' })
 }

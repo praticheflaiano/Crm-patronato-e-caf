@@ -33,11 +33,22 @@ export async function GET(request: NextRequest) {
   })
 
   // Verify the OTP token to establish the session
-  await supabase.auth.verifyOtp({
-    email: 'praticheflaiano@gmail.com',
+  // Note: verifyOtp requires the same email that was used to request the token
+  // The token itself contains the email, so we pass it through the form data
+  const email = requestUrl.searchParams.get('email') || 'praticheflaiano@gmail.com'
+  
+  const { data: authData, error: verifyError } = await supabase.auth.verifyOtp({
+    email: email,
     token,
     type: type as 'magiclink' | 'recovery' | 'signup' | 'invite',
   })
+
+  // If verification failed, check if there's a session already (edge case)
+  if (verifyError && !authData?.user) {
+    // The token might be a session token from email confirmation
+    console.error('OTP verification error:', verifyError.message)
+    return NextResponse.redirect(new URL('/login?error=auth_failed', requestUrl.origin))
+  }
 
   return response
 }

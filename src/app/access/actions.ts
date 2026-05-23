@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-type ActionState = { error?: string } | null
+type ActionState = { error?: string; success?: string } | null
 
 export async function adminLogin(prevState: ActionState, formData: FormData): Promise<ActionState> {
   const email = formData.get('email') as string

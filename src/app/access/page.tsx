@@ -39,8 +39,16 @@ export default function AccessPage() {
           </div>
 
           {state?.error && (
-            <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+            <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700 flex items-center gap-2">
+              <span className="text-red-500">●</span>
               {state.error}
+            </div>
+          )}
+
+          {state?.success && (
+            <div className="rounded-md bg-emerald-50 border border-emerald-200 p-3 text-sm text-emerald-700 flex items-center gap-2">
+              <span className="text-emerald-500">✓</span>
+              {state.success}
             </div>
           )}
 

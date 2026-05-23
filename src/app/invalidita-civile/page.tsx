@@ -45,7 +45,7 @@ export default async function InvaliditaCivilePage() {
           className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
         >
           <Plus size={16} aria-hidden="true" />
-          Nuova Pratica Invalidità
+          Nuova Pratica
         </Link>
       </div>
 
