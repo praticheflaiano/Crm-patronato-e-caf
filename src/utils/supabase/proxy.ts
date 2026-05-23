@@ -1,53 +1,51 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { getSupabasePublishableKey, getSupabaseUrl } from './config'
+import { getSupabaseUrl } from './config'
 
 const PUBLIC_ROUTES = ['/login', '/auth', '/access']
 
-export async function updateSession(request: NextRequest) {
+function getSupabaseAuthCookiePrefix() {
   const supabaseUrl = getSupabaseUrl()
-  const supabaseKey = getSupabasePublishableKey()
 
-  if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.next({ request })
+  try {
+    const hostname = new URL(supabaseUrl).hostname
+    const projectRef = hostname.split('.')[0]
+    return `sb-${projectRef}-auth-token`
+  } catch {
+    return 'sb-'
   }
+}
 
-  let supabaseResponse = NextResponse.next({ request })
+function hasSupabaseSessionCookie(request: NextRequest) {
+  const authCookiePrefix = getSupabaseAuthCookiePrefix()
 
-  const supabase = createServerClient(supabaseUrl, supabaseKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll()
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        supabaseResponse = NextResponse.next({ request })
-        cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
-        )
-      },
-    },
+  return request.cookies.getAll().some((cookie) => {
+    // Default @supabase/ssr cookie:
+    // sb-<project-ref>-auth-token
+    // It may also be chunked as sb-<project-ref>-auth-token.0, .1, ...
+    return (
+      cookie.name === authCookiePrefix ||
+      cookie.name.startsWith(`${authCookiePrefix}.`) ||
+      // Legacy temporary cookie used during early deploy tests.
+      cookie.name === 'sb-access-token'
+    )
   })
+}
 
-  // Check for session cookie (doesn't require network call)
-  const sessionCookie = request.cookies.get('sb-access-token')
-  const isAuthenticated = Boolean(sessionCookie?.value)
-
+export async function updateSession(request: NextRequest) {
+  const isAuthenticated = hasSupabaseSessionCookie(request)
   const isPublicRoute = PUBLIC_ROUTES.some(route => request.nextUrl.pathname.startsWith(route))
 
-  // If no session cookie and not a public route, redirect to login
   if (!isAuthenticated && !isPublicRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // If authenticated but on login page, go to dashboard
-  if (isAuthenticated && request.nextUrl.pathname.startsWith('/login')) {
+  if (isAuthenticated && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/access'))) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
   }
 
-  return supabaseResponse
+  return NextResponse.next({ request })
 }
