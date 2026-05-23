@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
+import { getSafeErrorMessage, isMissingSchemaResourceError } from '@/lib/supabase-errors'
 
 export async function GET() {
   const supabase = await createClient()
@@ -8,6 +9,12 @@ export async function GET() {
     .select('*', { count: 'exact', head: true })
     .eq('is_read', false)
   
-  if (error) return NextResponse.json({ error }, { status: 500 })
+  if (error) {
+    if (isMissingSchemaResourceError(error)) {
+      return NextResponse.json({ count: 0 })
+    }
+    return NextResponse.json({ error: getSafeErrorMessage(error), count: 0 }, { status: 500 })
+  }
+
   return NextResponse.json({ count: count ?? 0 })
 }

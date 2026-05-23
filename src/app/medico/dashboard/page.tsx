@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { FileText, AlertCircle, CheckCircle, Clock, TrendingUp, Calendar, User } from 'lucide-react'

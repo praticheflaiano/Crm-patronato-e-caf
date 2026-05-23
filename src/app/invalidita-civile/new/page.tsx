@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from 'next/link'
 import { Save, UserPlus } from 'lucide-react'
 import {

@@ -7,8 +7,8 @@ export default function AccessPage() {
   const [state, formAction, isPending] = useActionState(adminLogin, null)
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100">
-      <div className="bg-white rounded-lg border p-8 text-center max-w-md w-full">
+    <main className="flex min-h-dvh items-center justify-center bg-slate-100 px-4 py-6">
+      <div className="w-full max-w-md rounded-lg border bg-white p-5 text-center shadow-sm sm:p-8">
         <h1 className="text-xl font-bold text-slate-950">Accesso diretto CRM</h1>
         <p className="mt-3 text-slate-600 text-sm">
           Inserisci le credenziali admin per accedere.

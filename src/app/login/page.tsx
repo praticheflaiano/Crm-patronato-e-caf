@@ -3,17 +3,17 @@ import { login, signup } from './actions'
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
+    <main className="flex min-h-dvh items-start justify-center overflow-y-auto bg-slate-100 px-4 py-4 sm:items-center sm:py-8">
       <div className="w-full max-w-xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        <section className="bg-slate-950 px-6 py-8 text-white sm:px-8">
+        <section className="bg-slate-950 px-5 py-5 text-white sm:px-8 sm:py-8">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
             <ClipboardList size={24} aria-hidden="true" />
           </div>
-          <h1 className="mt-6 text-2xl font-bold tracking-tight sm:text-3xl">Centro Flaiano CRM</h1>
+          <h1 className="mt-5 text-2xl font-bold tracking-tight sm:mt-6 sm:text-3xl">Centro Flaiano CRM</h1>
           <p className="mt-3 max-w-md text-sm leading-6 text-slate-300">
             Gestione operativa per contatti, pratiche CAF e patronato, documenti e scadenze.
           </p>
-          <div className="mt-8 space-y-3 text-sm text-slate-300">
+          <div className="mt-6 hidden space-y-3 text-sm text-slate-300 sm:block">
             <div className="rounded-md border border-white/10 bg-white/5 p-4">
               Pratiche e contatti in un unico spazio di lavoro.
             </div>
@@ -23,7 +23,7 @@ export default function LoginPage() {
           </div>
         </section>
 
-        <section className="px-6 py-8 sm:px-8">
+        <section className="px-5 py-6 sm:px-8 sm:py-8">
           <div>
             <h2 className="text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">Accedi</h2>
             <p className="mt-2 text-sm text-slate-500">Inserisci le credenziali del tuo account.</p>

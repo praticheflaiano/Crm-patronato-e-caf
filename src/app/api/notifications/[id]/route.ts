@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
+import { getSafeErrorMessage, isMissingSchemaResourceError } from '@/lib/supabase-errors'
 
 export async function GET(
   request: Request,
@@ -13,7 +14,13 @@ export async function GET(
     .eq('id', id)
     .single()
   
-  if (error) return NextResponse.json({ error }, { status: 500 })
+  if (error) {
+    if (isMissingSchemaResourceError(error)) {
+      return NextResponse.json({ ok: false, error: 'Modulo notifiche non ancora migrato' }, { status: 404 })
+    }
+    return NextResponse.json({ ok: false, error: getSafeErrorMessage(error) }, { status: 500 })
+  }
+
   return NextResponse.json(data)
 }
 
@@ -23,15 +30,21 @@ export async function PATCH(
 ) {
   const { id } = await params
   const supabase = await createClient()
-  const updateData = await request.json()
+  const updateData = await request.json().catch(() => ({}))
   const { data, error } = await supabase
     .from('notifications')
     .update({ ...updateData, is_read: true } as never)
     .eq('id', id)
     .select()
   
-  if (error) return NextResponse.json({ error }, { status: 500 })
-  return NextResponse.json(data)
+  if (error) {
+    if (isMissingSchemaResourceError(error)) {
+      return NextResponse.json({ ok: false, skipped: true, error: 'Modulo notifiche non ancora migrato' })
+    }
+    return NextResponse.json({ ok: false, error: getSafeErrorMessage(error) }, { status: 500 })
+  }
+
+  return NextResponse.json(Array.isArray(data) ? data : [])
 }
 
 export async function DELETE(
@@ -45,6 +58,12 @@ export async function DELETE(
     .delete()
     .eq('id', id)
   
-  if (error) return NextResponse.json({ error }, { status: 500 })
-  return NextResponse.json({ status: 'success' })
+  if (error) {
+    if (isMissingSchemaResourceError(error)) {
+      return NextResponse.json({ ok: false, skipped: true, error: 'Modulo notifiche non ancora migrato' })
+    }
+    return NextResponse.json({ ok: false, error: getSafeErrorMessage(error) }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
 }

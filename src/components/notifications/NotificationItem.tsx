@@ -7,7 +7,7 @@ export interface Notification {
   user_id: string
   title: string
   message: string
-  type: 'task' | 'case' | 'document'
+  type: 'task' | 'case' | 'document' | string
   related_id: string | null
   is_read: boolean
   created_at: string
@@ -33,8 +33,8 @@ const typeColors = {
 }
 
 export default function NotificationItem({ notification, onRead, onDelete }: NotificationItemProps) {
-  const Icon = typeIcons[notification.type]
-  const colorClass = typeColors[notification.type]
+  const Icon = typeIcons[notification.type as keyof typeof typeIcons] ?? Bell
+  const colorClass = typeColors[notification.type as keyof typeof typeColors] ?? 'text-slate-600 bg-slate-50'
 
   return (
     <div
@@ -47,21 +47,22 @@ export default function NotificationItem({ notification, onRead, onDelete }: Not
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <p className={`text-sm font-medium ${!notification.is_read ? 'text-slate-900' : 'text-slate-700'}`}>
-            {notification.title}
+          <p className={`break-words text-sm font-medium ${!notification.is_read ? 'text-slate-900' : 'text-slate-700'}`}>
+            {notification.title || 'Notifica'}
           </p>
           {!notification.is_read && (
             <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
           )}
         </div>
-        <p className="mt-0.5 text-sm text-slate-500">{notification.message}</p>
+        <p className="mt-0.5 break-words text-sm text-slate-500">{notification.message || 'Aggiornamento CRM'}</p>
         <p className="mt-1 text-xs text-slate-400">
-          {formatDistanceToNow(notification.created_at)}
+          {notification.created_at ? formatDistanceToNow(notification.created_at) : 'Ora'}
         </p>
       </div>
-      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="flex shrink-0 items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
         {!notification.is_read && onRead && (
           <button
+            type="button"
             onClick={() => onRead(notification.id)}
             className="rounded p-1.5 text-slate-400 hover:bg-slate-200 hover:text-slate-600"
             title="Segna come letta"
@@ -71,6 +72,7 @@ export default function NotificationItem({ notification, onRead, onDelete }: Not
         )}
         {onDelete && (
           <button
+            type="button"
             onClick={() => onDelete(notification.id)}
             className="rounded p-1.5 text-slate-400 hover:bg-red-100 hover:text-red-600"
             title="Elimina"

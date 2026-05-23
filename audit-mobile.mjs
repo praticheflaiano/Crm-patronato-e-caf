@@ -1,4 +1,4 @@
-import { chromium, devices } from 'playwright'
+import { chromium } from 'playwright'
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:3000'
 const PAGES = [

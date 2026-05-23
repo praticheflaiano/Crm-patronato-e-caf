@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
         ap70_filing_date: ap70_filing_date || null,
         ap70_protocol_number: ap70_protocol_number || null,
         medical_examiner_id: typedProfile.role === 'doctor' ? user.id : null,
+        organization_id: typedProfile.organization_id,
       })
       .select()
       .single()

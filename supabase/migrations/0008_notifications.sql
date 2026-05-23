@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     related_id UUID, -- Can reference tasks.id, cases.id, or documents.id
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE
 );
 

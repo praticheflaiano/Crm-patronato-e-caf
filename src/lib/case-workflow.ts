@@ -62,8 +62,8 @@ export const CASE_TYPE_META = {
     description: 'Pratiche previdenziali, pensionistiche e assistenziali.',
   },
   invalidita_civile: {
-    label: 'Invalidita Civile',
-    description: 'Domande e iter collegati al riconoscimento di invalidita civile.',
+    label: 'Invalidità Civile',
+    description: 'Domande e iter collegati al riconoscimento di invalidità civile.',
   },
 } satisfies Record<CaseType, CaseTypeMeta>
 

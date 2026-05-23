@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS invalidity_details (
     ap70_protocol_number TEXT,
     -- Medical examiner
     medical_examiner_id UUID REFERENCES auth.users(id), -- The doctor assigned to this case
+    -- Organization (for RLS)
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     -- Timestamps
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -41,6 +43,11 @@ CREATE TRIGGER update_invalidity_details_updated_at
 BEFORE UPDATE ON invalidity_details 
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
+-- Trigger to set organization_id automatically
+CREATE TRIGGER set_invalidity_details_organization_id
+BEFORE INSERT ON invalidity_details
+FOR EACH ROW EXECUTE PROCEDURE set_current_user_organization_id();
+
 -- ============================================
 -- ENHANCED MEDICAL CERTIFICATES TABLE
 -- ============================================
@@ -51,7 +58,7 @@ CREATE TABLE IF NOT EXISTS medical_certificates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     case_id UUID NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
     -- Certificate identification
-    certificate_type TEXT NOT NULL CHECK (certificate_type IN ('hinch_60', 'hinch_65', '剖_70', '剖_104', 'altro')),
+    certificate_type TEXT NOT NULL CHECK (certificate_type IN ('hinch_60', 'hinch_65', 'cert_70', 'cert_104', 'altro')),
     certificate_number TEXT,
     certificate_series TEXT,
     -- Issuing physician
