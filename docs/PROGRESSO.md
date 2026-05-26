@@ -31,7 +31,7 @@ Ultimo aggiornamento: 2026-05-26
   - `0004_profiles_organizations_roles.sql`
   - `0005_profile_self_setup.sql`
   - `0006_fix_profiles_rls_recursion.sql`
-- Migrazioni locali aggiunte/da verificare sul database remoto:
+- Migrazioni TARI/task note applicate e verificate sul database remoto:
   - `0010_tari_module.sql` (aggiunge `tari` all'enum `case_type`)
   - `0011_task_notes.sql`
   - `0012_rls_task_notes.sql`
@@ -85,13 +85,13 @@ Ultimo aggiornamento: 2026-05-26
 2. CRUD completo contatti e pratiche. Base completata.
 3. Pipeline pratiche e stati strutturati. Base completata.
 4. Documenti con upload/download privato. Base completata.
-5. Task e note. Base implementata; applicare/verificare migrazioni remote.
+5. Task e note. Base implementata; migrazioni remote applicate e verificate.
 6. RLS avanzata per admin, operatori, collaboratori e medici. Da consolidare.
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
 8. Knowledge base. Da fare.
 9. Assistente AI con RAG protetto. Da fare.
-10. Import CSV, deploy produzione e checklist sicurezza. Da fare.
-11. Modulo TARI Roma/AMA. Integrato; applicare migrazione `0010_tari_module.sql` sul database remoto.
+10. Import CSV e checklist sicurezza avanzata. Da fare.
+11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
 
 ## Team agenti attivo
 
@@ -103,9 +103,9 @@ Ultimo aggiornamento: 2026-05-26
 
 Integrare i risultati dei worker in questo ordine:
 
-1. Applicare/verificare su Supabase remoto le migrazioni `0010`, `0011` e `0012`.
-2. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
-3. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
+1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
+2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
+3. Aggiungere import CSV e checklist sicurezza avanzata.
 
 ## Comandi di verifica
 

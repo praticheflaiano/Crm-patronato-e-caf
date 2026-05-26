@@ -55,7 +55,7 @@ Accesso rapido:
 - `/cases/new?type=tari` → nuova pratica TARI;
 - `/cases?type=tari` → elenco pratiche TARI.
 
-Migrazione DB richiesta per produzione: `supabase/migrations/0010_tari_module.sql` aggiunge il valore `tari` all'enum `case_type`. Le migrazioni task note (`0011`, `0012`) vanno applicate se non già presenti nel database remoto.
+Migrazioni DB produzione applicate e verificate: `supabase/migrations/0010_tari_module.sql` aggiunge il valore `tari` all'enum `case_type`; `0011_task_notes.sql` e `0012_rls_task_notes.sql` aggiungono note task, indici e policy RLS.
 
 ## Setup Locale
 
