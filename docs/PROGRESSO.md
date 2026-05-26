@@ -67,7 +67,7 @@ Ultimo aggiornamento: 2026-05-26
 - Task e note pratica integrati lato UI/API, con tipi locali allineati.
 - Modulo Invalidita Civile integrato.
 - Modulo TARI Roma/AMA integrato come case type nativo (`tari`), con portale `/tari`, scheda dettaglio `/tari/[id]`, fonti ufficiali AMA/Roma Capitale, checklist documentale e mappatura moduli.
-- Chat AI presente come base, ma non ancora RAG.
+- Chat AI collegata a OpenRouter via Vercel AI SDK; modello predefinito `minimax/minimax-m2.7`. RAG non ancora implementato.
 - Tema chiaro stabile: rimosso il dark mode automatico che rendeva la UI nera/illeggibile.
 
 ## Decisioni importanti
@@ -89,7 +89,7 @@ Ultimo aggiornamento: 2026-05-26
 6. RLS avanzata per admin, operatori, collaboratori e medici. Da consolidare.
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
 8. Knowledge base. Da fare.
-9. Assistente AI con RAG protetto. Da fare.
+9. Assistente AI OpenRouter implementato; RAG protetto da fare.
 10. Import CSV e checklist sicurezza avanzata. Da fare.
 11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
 

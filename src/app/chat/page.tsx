@@ -1,17 +1,16 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
-import { useState } from 'react'
 import { Send, Bot, User as UserIcon } from 'lucide-react'
 
 export default function ChatPage() {
-  const [error] = useState<string | null>(null)
   const chat = useChat({} as any) as any /* eslint-disable-line @typescript-eslint/no-explicit-any */
   const messages: any[] = chat.messages || [] /* eslint-disable-line @typescript-eslint/no-explicit-any */
   const input: string = chat.input || ''
   const handleInputChange = chat.handleInputChange
   const handleSubmit = chat.handleSubmit
   const isLoading = chat.isLoading
+  const errorMessage = chat.error?.message || null
 
   return (
     <div className="flex h-[calc(100dvh-7.5rem)] min-h-0 flex-col md:h-[calc(100dvh-8rem)]">
@@ -22,7 +21,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {error && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+      {errorMessage && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{errorMessage}</div>}
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain rounded-t-lg border border-slate-200 bg-white p-3 shadow-sm sm:space-y-4 sm:p-4">
         {messages.length === 0 ? (

@@ -6,7 +6,7 @@ Sistema CRM per la gestione pratiche di patronato, CAF e TARI Roma/AMA — costr
 
 - **Frontend**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4
 - **Backend**: Supabase (Auth, Database, Storage)
-- **AI**: OpenAI GPT-4o via Vercel AI SDK
+- **AI**: OpenRouter via Vercel AI SDK, modello predefinito `minimax/minimax-m2.7`
 - **Deploy**: Vercel
 
 ## Moduli inclusi
@@ -76,7 +76,10 @@ npm run dev
 4. In **Environment Variables** aggiungi:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-   - `OPENAI_API_KEY` (opzionale, per l'assistente AI)
+   - `OPENROUTER_API_KEY` (per l'assistente AI)
+   - `OPENROUTER_MODEL` (opzionale; default `minimax/minimax-m2.7`)
+   - `OPENROUTER_SITE_URL` (opzionale; default URL produzione)
+   - `OPENROUTER_APP_NAME` (opzionale)
 5. Clicca **Deploy**
 
 ## Moduli
