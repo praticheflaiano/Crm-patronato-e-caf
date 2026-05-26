@@ -9,6 +9,10 @@ import { createClient } from '@/utils/supabase/server'
 type SearchParams = Record<string, string | string[] | undefined>
 type CaseRecord = Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
 
+function getCaseDetailHref(caseItem: CaseRecord) {
+  return caseItem.type === 'tari' ? `/tari/${caseItem.id}` : `/cases/${caseItem.id}`
+}
+
 function getParam(params: SearchParams, key: string) {
   const value = params[key]
   return Array.isArray(value) ? value[0] : value
@@ -21,7 +25,7 @@ function CaseCard({ caseItem }: { caseItem: CaseRecord }) {
     : null
 
   return (
-    <Link href={`/cases/${caseItem.id}`} className="block rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:border-blue-200 hover:bg-blue-50/30 active:bg-blue-50">
+    <Link href={getCaseDetailHref(caseItem)} className="block rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:border-blue-200 hover:bg-blue-50/30 active:bg-blue-50">
       <div className="flex flex-col gap-3">
         <div>
           <h3 className="break-words text-sm font-semibold text-slate-950">{caseItem.title}</h3>
@@ -145,7 +149,7 @@ export default async function CasesPage({ searchParams }: { searchParams?: Promi
                         <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-600">{caseItem.contacts ? `${caseItem.contacts.last_name} ${caseItem.contacts.first_name}` : 'N/D'}</td>
                         <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-600">{getCaseTypeLabel(caseItem.type)}</td>
                         <td className="whitespace-nowrap px-5 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusMeta.badgeClassName}`}>{statusMeta.label}</span></td>
-                        <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold"><Link href={`/cases/${caseItem.id}`} className="text-blue-700 hover:text-blue-900">Dettagli</Link></td>
+                        <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold"><Link href={getCaseDetailHref(caseItem)} className="text-blue-700 hover:text-blue-900">Dettagli</Link></td>
                       </tr>
                     )
                   })}

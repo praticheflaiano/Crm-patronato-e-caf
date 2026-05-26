@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { AlertTriangle, CalendarDays, CheckCircle2, Clock, FileWarning, Plus, Users } from 'lucide-react'
+import { AlertTriangle, CalendarDays, CheckCircle2, Clock, FileText, FileWarning, Plus, Users } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
 import { getCaseStatusMeta, getCaseTypeLabel } from '@/lib/case-workflow'
 import { formatDateIt, isPastDate, isTodayDate, isWithinNextDays } from '@/lib/date-utils'
@@ -45,6 +45,8 @@ export default async function DashboardPage() {
   const certificates = Array.isArray(certificatesResult.data) ? certificatesResult.data as AnyRecord[] : []
 
   const openCases = cases.filter(item => item.status !== 'completed' && item.status !== 'rejected')
+  const tariCases = cases.filter(item => item.type === 'tari')
+  const tariOpenCases = tariCases.filter(item => item.status !== 'completed' && item.status !== 'rejected')
   const pendingDocs = cases.filter(item => item.status === 'pending_documents')
   const activeTasks = tasks.filter(task => !task.is_completed)
   const overdueTasks = activeTasks.filter(task => isPastDate(task.due_date))
@@ -84,6 +86,28 @@ export default async function DashboardPage() {
         <StatCard label="Aperte" value={openCases.length} helper={`${contactsResult.count ?? 0} contatti`} tone="slate" />
         <StatCard label="Sanitarie" value={expiringCertificates.length + inpsVisits.length + ap70Open.length} helper="Certificati/AP70/visite" tone="blue" />
       </div>
+
+      <section className="rounded-xl border border-blue-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">TARI Roma / AMA</p>
+            <h2 className="mt-1 text-lg font-bold text-slate-950">Accesso rapido al portale integrato</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              {tariOpenCases.length} pratiche TARI aperte su {tariCases.length} totali. Usa il modulo dedicato per fonti ufficiali, workflow e mappatura dei moduli.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link href="/tari" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+              <FileText size={16} aria-hidden="true" />
+              Apri area TARI
+            </Link>
+            <Link href="/cases/new?type=tari" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+              <Plus size={16} aria-hidden="true" />
+              Nuova pratica TARI
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <section className="rounded-xl border border-slate-200 bg-white shadow-sm">

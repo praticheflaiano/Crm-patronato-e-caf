@@ -9,7 +9,7 @@ import {
   secondaryButtonClassName,
 } from '@/components/forms/form-layout'
 import { SetupNotice } from '@/components/setup-notice'
-import { CASE_TYPES, CASE_TYPE_META } from '@/lib/case-workflow'
+import { CASE_TYPES, CASE_TYPE_META, type CaseType } from '@/lib/case-workflow'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 import { createCase } from './actions'
@@ -25,6 +25,8 @@ export default async function NewCasePage({ searchParams }: { searchParams?: Pro
 
   const params = (await searchParams) ?? {}
   const selectedContactId = getParam(params, 'contactId') ?? ''
+  const selectedTypeParam = getParam(params, 'type')
+  const selectedType = CASE_TYPES.includes(selectedTypeParam as CaseType) ? (selectedTypeParam as CaseType) : CASE_TYPES[0]
 
   const supabase = await createClient()
   const { data: contacts } = await supabase
@@ -39,7 +41,7 @@ export default async function NewCasePage({ searchParams }: { searchParams?: Pro
       <FormPageHeader
         backHref="/cases"
         title="Nuova pratica"
-        description="Crea una pratica CAF, patronato o invalidità civile e collegala a un contatto."
+        description="Crea una pratica CAF, patronato, invalidità civile o TARI Roma/AMA e collegala a un contatto."
       />
 
       {!hasContacts ? (
@@ -61,13 +63,13 @@ export default async function NewCasePage({ searchParams }: { searchParams?: Pro
         <form action={createCase} className="space-y-5 p-4 sm:p-6">
           <div>
             <label htmlFor="title" className={labelClassName}>Titolo pratica *</label>
-            <input type="text" name="title" id="title" required placeholder="es. ISEE 2026, domanda NASpI, invalidità civile" className={fieldClassName} />
+            <input type="text" name="title" id="title" required placeholder="es. ISEE 2026, domanda NASpI, invalidità civile, TARI Roma" className={fieldClassName} />
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
               <label htmlFor="type" className={labelClassName}>Tipo di pratica *</label>
-              <select name="type" id="type" required className={fieldClassName}>
+              <select name="type" id="type" required defaultValue={selectedType} className={fieldClassName}>
                 {CASE_TYPES.map((type) => <option key={type} value={type}>{CASE_TYPE_META[type].label}</option>)}
               </select>
             </div>

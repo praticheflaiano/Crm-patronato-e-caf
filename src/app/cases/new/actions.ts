@@ -21,7 +21,7 @@ export async function createCase(formData: FormData) {
     title: formData.get('title') as string,
     description: formData.get('description') as string || null,
     contact_id: formData.get('contact_id') as string,
-    type: formData.get('type') as 'caf' | 'patronato' | 'invalidita_civile',
+    type: formData.get('type') as 'caf' | 'patronato' | 'invalidita_civile' | 'tari',
     status: 'open',
     assigned_to: user.id
   }

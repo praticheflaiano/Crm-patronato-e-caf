@@ -17,7 +17,7 @@ export async function updateCase(formData: FormData) {
     title: formData.get('title') as string,
     description: (formData.get('description') as string) || null,
     contact_id: formData.get('contact_id') as string,
-    type: formData.get('type') as 'caf' | 'patronato' | 'invalidita_civile',
+    type: formData.get('type') as 'caf' | 'patronato' | 'invalidita_civile' | 'tari',
     status: formData.get('status') as 'open' | 'in_progress' | 'pending_documents' | 'completed' | 'rejected',
   }
 

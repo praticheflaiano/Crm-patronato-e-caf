@@ -9,8 +9,8 @@ import { AppShell } from '@/components/app-shell'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'CAF & Patronato CRM',
-  description: 'Gestione pratiche e contatti per CAF e Patronato',
+  title: 'CAF, Patronato e TARI Roma/AMA CRM',
+  description: 'Gestione pratiche, contatti, documenti e TARI Roma/AMA per CAF, Patronato e servizi collegati',
 }
 
 export default async function RootLayout({

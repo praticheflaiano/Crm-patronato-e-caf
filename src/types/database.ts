@@ -106,7 +106,7 @@ export interface Database {
           title: string
           description: string | null
           status: 'open' | 'in_progress' | 'pending_documents' | 'completed' | 'rejected' | null
-          type: 'caf' | 'patronato' | 'invalidita_civile'
+          type: 'caf' | 'patronato' | 'invalidita_civile' | 'tari'
           created_at: string | null
           updated_at: string | null
           assigned_to: string | null
@@ -120,7 +120,7 @@ export interface Database {
           title: string
           description?: string | null
           status?: 'open' | 'in_progress' | 'pending_documents' | 'completed' | 'rejected' | null
-          type: 'caf' | 'patronato' | 'invalidita_civile'
+          type: 'caf' | 'patronato' | 'invalidita_civile' | 'tari'
           created_at?: string | null
           updated_at?: string | null
           assigned_to?: string | null
@@ -134,7 +134,7 @@ export interface Database {
           title?: string
           description?: string | null
           status?: 'open' | 'in_progress' | 'pending_documents' | 'completed' | 'rejected' | null
-          type?: 'caf' | 'patronato' | 'invalidita_civile'
+          type?: 'caf' | 'patronato' | 'invalidita_civile' | 'tari'
           created_at?: string | null
           updated_at?: string | null
           assigned_to?: string | null
@@ -220,6 +220,32 @@ export interface Database {
           updated_at?: string | null
           assigned_to?: string | null
           organization_id?: string
+        }
+      }
+      task_notes: {
+        Row: {
+          id: string
+          task_id: string | null
+          author_id: string | null
+          content: string
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          task_id?: string | null
+          author_id?: string | null
+          content: string
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          task_id?: string | null
+          author_id?: string | null
+          content?: string
+          created_at?: string | null
+          updated_at?: string | null
         }
       }
       medical_certificates: {
@@ -432,7 +458,7 @@ export interface Database {
     }
     Enums: {
       case_status: 'open' | 'in_progress' | 'pending_documents' | 'completed' | 'rejected'
-      case_type: 'caf' | 'patronato' | 'invalidita_civile'
+      case_type: 'caf' | 'patronato' | 'invalidita_civile' | 'tari'
       user_role: 'admin' | 'operator' | 'collaborator' | 'doctor'
     }
     CompositeTypes: {

@@ -63,6 +63,20 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
         </Link>
       </div>
 
+      {caseItem.type === 'tari' ? (
+        <section className="rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-blue-950">Scheda verticale TARI disponibile</h2>
+              <p className="mt-1 text-sm text-blue-900">Apri la vista dedicata con checklist documentale, fonti AMA Roma e workflow TARI.</p>
+            </div>
+            <Link href={`/tari/${caseItem.id}`} className="inline-flex min-h-10 items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+              Apri scheda TARI
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>

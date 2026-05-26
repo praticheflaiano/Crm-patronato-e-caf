@@ -28,8 +28,9 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: openai('gpt-4o'),
-    system: `Sei l'assistente virtuale del CAF e Patronato "Centro Pratiche Flaiano". 
+    system: `Sei l'assistente virtuale del CAF, Patronato e TARI "Centro Pratiche Flaiano".
     Il tuo compito è aiutare gli operatori a gestire pratiche, consultare documentazione e rispondere a domande normative.
+    Se la richiesta riguarda TARI Roma/AMA, privilegia sempre le fonti ufficiali AMA Roma e Roma Capitale e segnala quando un dato va verificato sul portale ufficiale.
     Non fornire mai diagnosi mediche. Se non conosci una risposta, dillo chiaramente.`,
     messages,
   })

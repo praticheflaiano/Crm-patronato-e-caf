@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { CalendarDays, ClipboardList, FolderKanban, Home, LogOut, Menu, MessageSquare, PlusCircle, Stethoscope, Users, X } from 'lucide-react'
+import { CalendarDays, ClipboardList, FileText, FolderKanban, Home, LogOut, Menu, MessageSquare, PlusCircle, Stethoscope, Users, X } from 'lucide-react'
 import NotificationBell from '@/components/notifications/NotificationBell'
 import { logout } from '@/app/login/actions'
 
@@ -19,6 +19,7 @@ const baseNavItems = [
   { href: '/', label: 'Dashboard', icon: Home },
   { href: '/contacts', label: 'Contatti', icon: Users },
   { href: '/cases', label: 'Pratiche', icon: FolderKanban },
+  { href: '/tari', label: 'TARI', icon: FileText },
   { href: '/tasks', label: 'Scadenze', icon: CalendarDays },
   { href: '/invalidita-civile', label: 'Invalidità Civile', icon: FolderKanban },
   { href: '/chat', label: 'Assistente AI', icon: MessageSquare },
@@ -27,6 +28,7 @@ const baseNavItems = [
 const bottomNavItems = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/cases', label: 'Pratiche', icon: FolderKanban },
+  { href: '/tari', label: 'TARI', icon: FileText },
   { href: '/tasks', label: 'Scadenze', icon: CalendarDays },
   { href: '/cases/new', label: 'Nuova', icon: PlusCircle },
 ]
@@ -147,7 +149,7 @@ export function AppShell({ children, userLabel, organizationName, roleLabel, isD
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 p-4 pb-24 md:p-8 md:pb-8">
           {children}
         </main>
-        <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur md:hidden">
+        <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur md:hidden">
           {bottomNavItems.map((item) => {
             const Icon = item.icon
             const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)

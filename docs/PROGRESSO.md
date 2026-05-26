@@ -1,6 +1,6 @@
 # Progresso CRM Patronato e CAF
 
-Ultimo aggiornamento: 2026-05-12
+Ultimo aggiornamento: 2026-05-26
 
 ## Repository e ambiente
 
@@ -31,6 +31,10 @@ Ultimo aggiornamento: 2026-05-12
   - `0004_profiles_organizations_roles.sql`
   - `0005_profile_self_setup.sql`
   - `0006_fix_profiles_rls_recursion.sql`
+- Migrazioni locali aggiunte/da verificare sul database remoto:
+  - `0010_tari_module.sql` (aggiunge `tari` all'enum `case_type`)
+  - `0011_task_notes.sql`
+  - `0012_rls_task_notes.sql`
 - Tabelle operative:
   - `organizations`
   - `profiles`
@@ -38,6 +42,7 @@ Ultimo aggiornamento: 2026-05-12
   - `cases`
   - `documents`
   - `tasks`
+  - `task_notes`
   - `medical_certificates`
 - Bucket privato Supabase Storage:
   - `documents`
@@ -59,6 +64,9 @@ Ultimo aggiornamento: 2026-05-12
 - Lista, creazione, dettaglio e modifica contatti.
 - Lista, creazione, dettaglio e modifica pratiche.
 - Cambio stato pratica.
+- Task e note pratica integrati lato UI/API, con tipi locali allineati.
+- Modulo Invalidita Civile integrato.
+- Modulo TARI Roma/AMA integrato come case type nativo (`tari`), con portale `/tari`, scheda dettaglio `/tari/[id]`, fonti ufficiali AMA/Roma Capitale, checklist documentale e mappatura moduli.
 - Chat AI presente come base, ma non ancora RAG.
 - Tema chiaro stabile: rimosso il dark mode automatico che rendeva la UI nera/illeggibile.
 
@@ -77,12 +85,13 @@ Ultimo aggiornamento: 2026-05-12
 2. CRUD completo contatti e pratiche. Base completata.
 3. Pipeline pratiche e stati strutturati. Base completata.
 4. Documenti con upload/download privato. Base completata.
-5. Task e note. Da fare.
-6. RLS avanzata per admin, operatori, collaboratori e medici. Da fare.
-7. Modulo Invalidita Civile. Da fare.
+5. Task e note. Base implementata; applicare/verificare migrazioni remote.
+6. RLS avanzata per admin, operatori, collaboratori e medici. Da consolidare.
+7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
 8. Knowledge base. Da fare.
 9. Assistente AI con RAG protetto. Da fare.
 10. Import CSV, deploy produzione e checklist sicurezza. Da fare.
+11. Modulo TARI Roma/AMA. Integrato; applicare migrazione `0010_tari_module.sql` sul database remoto.
 
 ## Team agenti attivo
 
@@ -94,9 +103,9 @@ Ultimo aggiornamento: 2026-05-12
 
 Integrare i risultati dei worker in questo ordine:
 
-1. Task e note su pratica.
-2. RLS avanzata per collaboratori e medici.
-3. Modulo Invalidita Civile.
+1. Applicare/verificare su Supabase remoto le migrazioni `0010`, `0011` e `0012`.
+2. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
+3. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
 
 ## Comandi di verifica
 

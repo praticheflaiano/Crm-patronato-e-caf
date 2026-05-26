@@ -101,7 +101,7 @@ export default async function TasksPage({ searchParams }: { searchParams?: Promi
                 Nessuna scadenza trovata con questi criteri.
               </div>
             ) : filteredTasks.map(task => (
-              <Link key={task.id} href={task.case_id ? `/cases/${task.case_id}` : '/tasks'} className="block p-4 hover:bg-slate-50 sm:p-5">
+              <div key={task.id} className="block p-4 hover:bg-slate-50 sm:p-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -117,7 +117,15 @@ export default async function TasksPage({ searchParams }: { searchParams?: Promi
                     <CalendarDays size={13} /> {formatDateIt(task.due_date)}
                   </span>
                 </div>
-              </Link>
+                <div className="mt-3">
+                  <Link
+                    href={task.case_id ? `/cases/${task.case_id}` : `/tasks/${task.id}`}
+                    className="inline-flex min-h-8 items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                  >
+                    Dettaglio
+                  </Link>
+                </div>
+              </div>
             ))}
           </div>
         </section>

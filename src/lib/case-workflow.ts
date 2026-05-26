@@ -22,7 +22,7 @@ export const CASE_STATUSES: readonly CaseStatus[] = [
   'rejected',
 ]
 
-export const CASE_TYPES: readonly CaseType[] = ['caf', 'patronato', 'invalidita_civile']
+export const CASE_TYPES: readonly CaseType[] = ['caf', 'patronato', 'invalidita_civile', 'tari']
 
 export const CASE_STATUS_META = {
   open: {
@@ -64,6 +64,10 @@ export const CASE_TYPE_META = {
   invalidita_civile: {
     label: 'Invalidità Civile',
     description: 'Domande e iter collegati al riconoscimento di invalidità civile.',
+  },
+  tari: {
+    label: 'TARI Roma/AMA',
+    description: 'Pratiche TARI Roma/AMA: attivazione, variazione, cessazione, riduzioni e contestazioni.',
   },
 } satisfies Record<CaseType, CaseTypeMeta>
 
