@@ -58,10 +58,31 @@ export default async function CasesPage({ searchParams }: { searchParams?: Promi
     .order('created_at', { ascending: false })
 
   const cases = Array.isArray(data) ? data as CaseRecord[] : []
-  const filteredCases = cases.filter(caseItem => {
+  // Filter by text + type first so the quick-filter chips can show per-status counts
+  // within the current search/type context.
+  const baseFiltered = cases.filter(caseItem => {
     const haystack = [caseItem.title, caseItem.description, caseItem.contacts?.first_name, caseItem.contacts?.last_name, caseItem.contacts?.fiscal_code].filter(Boolean).join(' ').toLowerCase()
-    return (!q || haystack.includes(q)) && (status === 'all' || caseItem.status === status) && (type === 'all' || caseItem.type === type)
+    return (!q || haystack.includes(q)) && (type === 'all' || caseItem.type === type)
   })
+  const filteredCases = baseFiltered.filter(caseItem => status === 'all' || caseItem.status === status)
+
+  const statusCounts: Record<string, number> = { all: baseFiltered.length }
+  for (const item of CASE_STATUSES) statusCounts[item] = baseFiltered.filter(caseItem => caseItem.status === item).length
+
+  function quickFilterHref(nextStatus: string) {
+    const sp = new URLSearchParams()
+    if (q) sp.set('q', q)
+    if (type !== 'all') sp.set('type', type)
+    if (view !== 'list') sp.set('view', view)
+    if (nextStatus !== 'all') sp.set('status', nextStatus)
+    const qs = sp.toString()
+    return qs ? `/cases?${qs}` : '/cases'
+  }
+
+  const statusChips: { key: string; label: string }[] = [
+    { key: 'all', label: 'Tutte' },
+    ...CASE_STATUSES.map((item) => ({ key: item, label: CASE_STATUS_META[item].label })),
+  ]
 
   return (
     <div className="space-y-6">
@@ -82,16 +103,31 @@ export default async function CasesPage({ searchParams }: { searchParams?: Promi
         </div>
       </div>
 
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        {statusChips.map((chip) => {
+          const isActive = status === chip.key
+          return (
+            <Link
+              key={chip.key}
+              href={quickFilterHref(chip.key)}
+              className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${
+                isActive ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              {chip.label}
+              <span className={`rounded-full px-1.5 text-xs font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{statusCounts[chip.key] ?? 0}</span>
+            </Link>
+          )
+        })}
+      </div>
+
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-        <form className="grid grid-cols-1 gap-3 border-b border-slate-200 p-4 sm:grid-cols-2 lg:grid-cols-[1fr_190px_190px_170px_auto] lg:p-5">
+        <form className="grid grid-cols-1 gap-3 border-b border-slate-200 p-4 sm:grid-cols-2 lg:grid-cols-[1fr_190px_170px_auto] lg:p-5">
+          <input type="hidden" name="status" value={status} />
           <div className="relative sm:col-span-2 lg:col-span-1">
             <Search size={17} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input name="q" defaultValue={q} placeholder="Cerca per titolo pratica, cliente o codice fiscale..." className="block w-full rounded-md border border-slate-300 py-2.5 pl-10 pr-3 text-base outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 sm:text-sm" />
           </div>
-          <select name="status" defaultValue={status} className="rounded-md border border-slate-300 px-3 py-2.5 text-base outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 sm:text-sm">
-            <option value="all">Tutti gli stati</option>
-            {CASE_STATUSES.map(item => <option key={item} value={item}>{CASE_STATUS_META[item].label}</option>)}
-          </select>
           <select name="type" defaultValue={type} className="rounded-md border border-slate-300 px-3 py-2.5 text-base outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 sm:text-sm">
             <option value="all">Tutti i servizi</option>
             {CASE_TYPES.map(item => <option key={item} value={item}>{CASE_TYPE_META[item].label}</option>)}

@@ -28,6 +28,19 @@ function actionIcon(status: CaseStatus) {
   return <RotateCcw size={16} aria-hidden="true" />
 }
 
+// Semantic styling so the operator instantly recognises the positive path
+// (advance/complete) versus the blocking or negative ones.
+function actionStyle(status: CaseStatus) {
+  const styles = {
+    open: 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50',
+    in_progress: 'border border-transparent bg-blue-600 text-white hover:bg-blue-700',
+    pending_documents: 'border border-transparent bg-amber-500 text-white hover:bg-amber-600',
+    completed: 'border border-transparent bg-emerald-600 text-white hover:bg-emerald-700',
+    rejected: 'border border-red-300 bg-white text-red-700 hover:bg-red-50',
+  } satisfies Record<CaseStatus, string>
+  return styles[status]
+}
+
 export default async function CaseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   if (!hasSupabaseConfig()) return <SetupNotice />
 
@@ -95,7 +108,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
                 <form key={status} action={updateCaseStatus}>
                   <input type="hidden" name="id" value={caseItem.id} />
                   <input type="hidden" name="status" value={status} />
-                  <button type="submit" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 sm:w-auto">
+                  <button type="submit" className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold shadow-sm sm:w-auto ${actionStyle(status)}`}>
                     {actionIcon(status)}
                     {actionLabel(status)}
                   </button>
