@@ -21,7 +21,7 @@ export async function createContact(formData: FormData) {
   const rawData = {
     first_name: formData.get('first_name') as string,
     last_name: formData.get('last_name') as string,
-    fiscal_code: formData.get('fiscal_code') as string,
+    fiscal_code: (formData.get('fiscal_code') as string || '').toUpperCase(),
     email: formData.get('email') as string || null,
     phone: formData.get('phone') as string || null,
     date_of_birth: formData.get('date_of_birth') as string || null,

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Save, UserPlus } from 'lucide-react'
+import { AlertTriangle, Save } from 'lucide-react'
 import {
   fieldClassName,
   FormCard,
@@ -8,6 +8,7 @@ import {
   primaryButtonClassName,
   secondaryButtonClassName,
 } from '@/components/forms/form-layout'
+import { CaseContactPicker } from '@/components/cases/case-contact-picker'
 import { SetupNotice } from '@/components/setup-notice'
 import { CASE_TYPES, CASE_TYPE_META, type CaseType } from '@/lib/case-workflow'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
@@ -20,6 +21,14 @@ function getParam(params: SearchParams, key: string) {
   return Array.isArray(value) ? value[0] : value
 }
 
+const errorMessages: Record<string, string> = {
+  missing: 'Compila titolo, tipo di pratica e contatto.',
+  profile: 'Profilo utente non disponibile. Riprova.',
+  insert: 'Errore durante la creazione della pratica. Riprova.',
+  contact: 'Per il nuovo contatto servono nome, cognome e codice fiscale.',
+  contact_duplicate: 'Contatto non creato: il codice fiscale potrebbe essere già presente. Cerca il contatto tra quelli esistenti.',
+}
+
 export default async function NewCasePage({ searchParams }: { searchParams?: Promise<SearchParams> }) {
   if (!hasSupabaseConfig()) return <SetupNotice />
 
@@ -27,6 +36,8 @@ export default async function NewCasePage({ searchParams }: { searchParams?: Pro
   const selectedContactId = getParam(params, 'contactId') ?? ''
   const selectedTypeParam = getParam(params, 'type')
   const selectedType = CASE_TYPES.includes(selectedTypeParam as CaseType) ? (selectedTypeParam as CaseType) : CASE_TYPES[0]
+  const errorKey = getParam(params, 'error') ?? ''
+  const errorMessage = errorKey ? errorMessages[errorKey] ?? 'Si è verificato un errore. Riprova.' : null
 
   const supabase = await createClient()
   const { data: contacts } = await supabase
@@ -34,28 +45,20 @@ export default async function NewCasePage({ searchParams }: { searchParams?: Pro
     .select('id, first_name, last_name, fiscal_code')
     .order('last_name', { ascending: true })
 
-  const hasContacts = Boolean(contacts?.length)
+  const contactList = (contacts ?? []) as { id: string; first_name: string; last_name: string; fiscal_code: string }[]
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <FormPageHeader
         backHref="/cases"
         title="Nuova pratica"
-        description="Crea una pratica CAF, patronato, invalidità civile o TARI Roma/AMA e collegala a un contatto."
+        description="Crea una pratica CAF, patronato, invalidità civile o TARI Roma/AMA e collegala a un contatto nuovo o esistente."
       />
 
-      {!hasContacts ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-amber-900">Prima serve almeno un contatto</p>
-              <p className="mt-1 text-sm text-amber-800">Le pratiche devono essere associate a un cliente già registrato.</p>
-            </div>
-            <Link href="/contacts/new" className={secondaryButtonClassName}>
-              <UserPlus size={16} aria-hidden="true" />
-              Nuovo contatto
-            </Link>
-          </div>
+      {errorMessage ? (
+        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-red-600" aria-hidden="true" />
+          <p className="text-sm font-medium text-red-800">{errorMessage}</p>
         </div>
       ) : null}
 
@@ -66,24 +69,14 @@ export default async function NewCasePage({ searchParams }: { searchParams?: Pro
             <input type="text" name="title" id="title" required placeholder="es. ISEE 2026, domanda NASpI, invalidità civile, TARI Roma" className={fieldClassName} />
           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div>
-              <label htmlFor="type" className={labelClassName}>Tipo di pratica *</label>
-              <select name="type" id="type" required defaultValue={selectedType} className={fieldClassName}>
-                {CASE_TYPES.map((type) => <option key={type} value={type}>{CASE_TYPE_META[type].label}</option>)}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="contact_id" className={labelClassName}>Contatto associato *</label>
-              <select name="contact_id" id="contact_id" required disabled={!hasContacts} defaultValue={selectedContactId} className={fieldClassName}>
-                <option value="">Seleziona un contatto...</option>
-                {contacts?.map((contact: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
-                  <option key={contact.id} value={contact.id}>{contact.last_name} {contact.first_name} ({contact.fiscal_code})</option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label htmlFor="type" className={labelClassName}>Tipo di pratica *</label>
+            <select name="type" id="type" required defaultValue={selectedType} className={fieldClassName}>
+              {CASE_TYPES.map((type) => <option key={type} value={type}>{CASE_TYPE_META[type].label}</option>)}
+            </select>
           </div>
+
+          <CaseContactPicker contacts={contactList} defaultContactId={selectedContactId} />
 
           <div>
             <label htmlFor="description" className={labelClassName}>Descrizione / note iniziali</label>
@@ -92,7 +85,7 @@ export default async function NewCasePage({ searchParams }: { searchParams?: Pro
 
           <div className="flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
             <Link href="/cases" className={secondaryButtonClassName}>Annulla</Link>
-            <button type="submit" disabled={!hasContacts} className={`${primaryButtonClassName} disabled:cursor-not-allowed disabled:bg-slate-300`}>
+            <button type="submit" className={primaryButtonClassName}>
               <Save size={16} aria-hidden="true" />
               Crea pratica
             </button>
