@@ -86,7 +86,7 @@ Ultimo aggiornamento: 2026-05-26
 3. Pipeline pratiche e stati strutturati. Base completata.
 4. Documenti con upload/download privato. Base completata.
 5. Task e note. Base implementata; migrazioni remote applicate e verificate.
-6. RLS avanzata per admin, operatori, collaboratori e medici. Da consolidare.
+6. RLS avanzata per admin, operatori, collaboratori e medici. Completato e consolidato.
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
 8. Knowledge base. Da fare.
 9. Assistente AI OpenRouter implementato; RAG protetto da fare.
@@ -103,8 +103,7 @@ Ultimo aggiornamento: 2026-05-26
 
 Integrare i risultati dei worker in questo ordine:
 
-1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
-2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
+1. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
 3. Aggiungere import CSV e checklist sicurezza avanzata.
 
 ## Comandi di verifica
