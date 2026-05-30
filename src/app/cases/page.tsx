@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { FolderKanban, Plus, Search } from 'lucide-react'
+import { Download, FolderKanban, Plus, Search } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
 import { CASE_STATUSES, CASE_STATUS_META, CASE_TYPES, CASE_TYPE_META, getCaseStatusMeta, getCaseTypeLabel } from '@/lib/case-workflow'
 import { formatDateIt } from '@/lib/date-utils'
@@ -70,10 +70,16 @@ export default async function CasesPage({ searchParams }: { searchParams?: Promi
           <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Pratiche</h1>
           <p className="mt-1 text-sm text-slate-500">Controlla avanzamento, documenti mancanti e scadenze operative.</p>
         </div>
-        <Link href="/cases/new" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 sm:w-auto">
-          <Plus size={16} aria-hidden="true" />
-          Nuova Pratica
-        </Link>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Link href="/cases/export" download className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+            <Download size={16} aria-hidden="true" />
+            Esporta CSV
+          </Link>
+          <Link href="/cases/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+            <Plus size={16} aria-hidden="true" />
+            Nuova Pratica
+          </Link>
+        </div>
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm">

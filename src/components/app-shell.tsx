@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { CalendarDays, ClipboardList, FileText, FolderKanban, Home, LogOut, Menu, MessageSquare, PlusCircle, Stethoscope, Users, X } from 'lucide-react'
+import { CalendarDays, ClipboardList, FileText, FolderKanban, History, Home, LogOut, Menu, MessageSquare, PlusCircle, Settings, Stethoscope, Users, X } from 'lucide-react'
 import NotificationBell from '@/components/notifications/NotificationBell'
+import { GlobalSearch } from '@/components/search/global-search'
 import { logout } from '@/app/login/actions'
 
 type AppShellProps = {
@@ -23,6 +24,8 @@ const baseNavItems = [
   { href: '/tasks', label: 'Scadenze', icon: CalendarDays },
   { href: '/invalidita-civile', label: 'Invalidità Civile', icon: FolderKanban },
   { href: '/chat', label: 'Assistente AI', icon: MessageSquare },
+  { href: '/audit', label: 'Registro attività', icon: History },
+  { href: '/settings', label: 'Impostazioni', icon: Settings },
 ]
 
 const bottomNavItems = [
@@ -143,10 +146,13 @@ export function AppShell({ children, userLabel, organizationName, roleLabel, isD
             <p className="truncate text-xs text-slate-400">Gestione operativa pratiche, scadenze e clienti</p>
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+            <div className="hidden sm:block">
+              <GlobalSearch />
+            </div>
             <NotificationBell />
           </div>
         </header>
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 p-4 pb-24 md:p-8 md:pb-8">
+        <main id="main-content" className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 p-4 pb-24 md:p-8 md:pb-8">
           {children}
         </main>
         <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur md:hidden">

@@ -2,6 +2,34 @@
 
 Ultimo aggiornamento: 2026-05-30
 
+## Sprint qualità & funzionalità (2026-05-30)
+
+Questo sprint ha completato le funzionalità trasversali di qualità e la documentazione del progetto.
+
+### Funzionalità aggiunte
+
+- **Ricerca globale**: componente `GlobalSearch` con API route `/api/search`; ricerca in tempo reale su contatti e pratiche.
+- **Export CSV**: endpoint `/api/contacts/export` e `/api/cases/export` con pulsanti di download nelle rispettive liste.
+- **Pagina Impostazioni / Profilo** (`/settings`): aggiornamento nome, email e preferenze utente via Server Action.
+- **Sistema notifiche toast**: varianti `success`, `error`, `warning`, `info`; API `/api/notifications`; supporto `aria-live="polite"`.
+- **Skeleton di caricamento**: file `loading.tsx` in tutte le sezioni principali (dashboard, contatti, pratiche, task).
+- **Pagina 404 personalizzata**: `not-found.tsx` con link di ritorno alla dashboard.
+- **Manifest PWA**: `manifest.ts` per installazione come app sul dispositivo.
+- **Test unitari**: suite Jest + React Testing Library in `src/lib/__tests__/` per workflow stati e utilità TARI.
+
+### Sicurezza
+
+- Storage documenti scoped per organizzazione (migrazione `0013`): accesso al bucket `documents` limitato ai soli membri dell'organizzazione proprietaria della pratica.
+- Hardening funzioni DB (migrazione `0014`): `search_path` fissato, `EXECUTE` su `rls_auto_enable` revocato per ruoli pubblici.
+- Rate limiting e validazione input sull'endpoint `/api/chat`.
+
+### Migliorato
+
+- Accessibilità: skip-link "Salta al contenuto" nel layout globale; `aria-live` sui messaggi di stato dinamici.
+- Documentazione: `README.md` revisionato, `CHANGELOG.md` creato (formato Keep a Changelog), `PROGRESSO.md` aggiornato.
+
+---
+
 ## Hardening sicurezza (2026-05-30)
 
 - Verificato lo stato reale del database remoto: le policy RLS su `contacts`,

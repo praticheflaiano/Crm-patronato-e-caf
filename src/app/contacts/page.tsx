@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Mail, Phone, Plus, Search, Users } from 'lucide-react'
+import { Download, Mail, Phone, Plus, Search, Users } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
@@ -37,10 +37,16 @@ export default async function ContactsPage({ searchParams }: { searchParams?: Pr
           <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Contatti</h1>
           <p className="mt-1 text-sm text-slate-500">Anagrafica clienti, recapiti e pratiche collegate.</p>
         </div>
-        <Link href="/contacts/new" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 sm:w-auto">
-          <Plus size={16} aria-hidden="true" />
-          Nuovo Contatto
-        </Link>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Link href="/contacts/export" download className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+            <Download size={16} aria-hidden="true" />
+            Esporta CSV
+          </Link>
+          <Link href="/contacts/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+            <Plus size={16} aria-hidden="true" />
+            Nuovo Contatto
+          </Link>
+        </div>
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
