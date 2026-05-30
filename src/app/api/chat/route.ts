@@ -10,12 +10,28 @@ const openRouterModel = process.env.OPENROUTER_MODEL?.trim() || 'minimax/minimax
 const openRouterSiteUrl = process.env.OPENROUTER_SITE_URL?.trim() || 'https://crm-patronato-e-caf.vercel.app'
 const openRouterAppName = process.env.OPENROUTER_APP_NAME?.trim() || 'Centro Pratiche Flaiano CRM'
 
+// Best-effort per-user rate limiting. On serverless this is per-instance only,
+// but it still curbs runaway usage and accidental loops without extra infra.
+const RATE_LIMIT_MAX = 20
+const RATE_LIMIT_WINDOW_MS = 60_000
+const MAX_MESSAGES = 50
+const MAX_TOTAL_CHARS = 24_000
+
+const rateLimitBuckets = new Map<string, number[]>()
+
+function isRateLimited(userId: string): boolean {
+  const now = Date.now()
+  const windowStart = now - RATE_LIMIT_WINDOW_MS
+  const recent = (rateLimitBuckets.get(userId) ?? []).filter((ts) => ts > windowStart)
+  recent.push(now)
+  rateLimitBuckets.set(userId, recent)
+  return recent.length > RATE_LIMIT_MAX
+}
+
 export async function POST(req: Request) {
   if (!hasSupabaseConfig()) {
     return new Response('Supabase is not configured', { status: 503 })
   }
-
-  const { messages } = await req.json()
 
   // Ensure user is authenticated
   const supabase = await createClient()
@@ -23,6 +39,22 @@ export async function POST(req: Request) {
 
   if (error || !user) {
     return new Response('Unauthorized', { status: 401 })
+  }
+
+  if (isRateLimited(user.id)) {
+    return new Response('Troppe richieste. Attendi un minuto e riprova.', { status: 429 })
+  }
+
+  const body = await req.json().catch(() => null)
+  const messages = body?.messages
+
+  if (!Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES) {
+    return new Response('Richiesta non valida.', { status: 400 })
+  }
+
+  const totalChars = JSON.stringify(messages).length
+  if (totalChars > MAX_TOTAL_CHARS) {
+    return new Response('Conversazione troppo lunga. Inizia una nuova chat.', { status: 413 })
   }
 
   const openRouterApiKey = process.env.OPENROUTER_API_KEY?.trim()

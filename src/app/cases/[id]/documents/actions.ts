@@ -65,7 +65,7 @@ export async function registerUploadedCaseDocument(formData: FormData) {
     file_size: fileSize,
     uploaded_by: user.id,
     organization_id: caseItem.organization_id,
-  } as any /* eslint-disable-line @typescript-eslint/no-explicit-any */)
+  } as never)
 
   if (metadataError) {
     return { ok: false, message: 'Metadati non salvati.' }

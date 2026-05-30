@@ -1,6 +1,33 @@
 # Progresso CRM Patronato e CAF
 
-Ultimo aggiornamento: 2026-05-26
+Ultimo aggiornamento: 2026-05-30
+
+## Hardening sicurezza (2026-05-30)
+
+- Verificato lo stato reale del database remoto: le policy RLS su `contacts`,
+  `cases`, `documents`, `tasks`, `medical_certificates` sono gia correttamente
+  isolate per `organization_id` tramite `profiles` (migrazione 0004). I file
+  locali `0002` (permissivo) e `0007` (rotto) erano fuorvianti.
+- `0013_storage_documents_org_scoped_rls.sql`: il bucket privato `documents`
+  non e piu accessibile a ogni utente autenticato. Accesso (read/insert/update/
+  delete) limitato ai membri dell'organizzazione proprietaria della pratica,
+  derivata dal prefisso `{case_id}/` del path. Applicata e verificata sul remoto.
+- `0014_security_hardening_functions.sql`: `search_path` fissato su
+  `update_updated_at_column` e `set_current_user_organization_id`; revocato
+  `execute` su `rls_auto_enable` da `anon/authenticated/public`. Applicata sul remoto.
+- `0007_advanced_rls_policies.sql` riscritta: rimuove le policy non valide
+  (`organization_id = auth.uid()`, colonna `doctor_id` inesistente) in modo
+  idempotente. Lo scoping per ruolo (collaboratore/medico) e rinviato a una
+  iterazione dedicata e testata per non bloccare gli operatori.
+- Security advisor Supabase: da 6 a 2 warning residui (estensione `vector` in
+  `public` e protezione password compromesse) — entrambi configurazioni a basso
+  rischio, non bug applicativi.
+- `/api/chat`: aggiunti validazione input (numero/lunghezza messaggi) e rate
+  limiting best-effort per utente per contenere costi/abusi OpenRouter.
+
+## Storico
+
+Ultimo aggiornamento precedente: 2026-05-26
 
 ## Repository e ambiente
 
