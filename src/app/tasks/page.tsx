@@ -68,10 +68,26 @@ export default async function TasksPage({ searchParams }: { searchParams?: Promi
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs font-semibold uppercase text-slate-500">Aperte</p><p className="mt-2 text-2xl font-bold text-slate-950">{openTasks.length}</p></div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 shadow-sm"><p className="text-xs font-semibold uppercase text-red-600">Scadute</p><p className="mt-2 text-2xl font-bold text-red-700">{overdue.length}</p></div>
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 shadow-sm"><p className="text-xs font-semibold uppercase text-amber-700">Oggi</p><p className="mt-2 text-2xl font-bold text-amber-700">{today.length}</p></div>
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm"><p className="text-xs font-semibold uppercase text-blue-700">7 giorni</p><p className="mt-2 text-2xl font-bold text-blue-700">{week.length}</p></div>
+        {[
+          { key: 'open', label: 'Aperte', value: openTasks.length, border: 'border-slate-200', bg: 'bg-white', text: 'text-slate-500', num: 'text-slate-950', ring: 'ring-slate-400' },
+          { key: 'overdue', label: 'Scadute', value: overdue.length, border: 'border-red-200', bg: 'bg-red-50', text: 'text-red-600', num: 'text-red-700', ring: 'ring-red-400' },
+          { key: 'today', label: 'Oggi', value: today.length, border: 'border-amber-200', bg: 'bg-amber-50', text: 'text-amber-700', num: 'text-amber-700', ring: 'ring-amber-400' },
+          { key: 'week', label: '7 giorni', value: week.length, border: 'border-blue-200', bg: 'bg-blue-50', text: 'text-blue-700', num: 'text-blue-700', ring: 'ring-blue-400' },
+        ].map((card) => {
+          const href = `/tasks?filter=${card.key}${q ? `&q=${encodeURIComponent(q)}` : ''}`
+          const isActive = filter === card.key
+          return (
+            <Link
+              key={card.key}
+              href={href}
+              aria-current={isActive ? 'true' : undefined}
+              className={`rounded-lg border ${card.border} ${card.bg} p-4 shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 ${card.ring} ${isActive ? `ring-2 ${card.ring}` : ''}`}
+            >
+              <p className={`text-xs font-semibold uppercase ${card.text}`}>{card.label}</p>
+              <p className={`mt-2 text-2xl font-bold ${card.num}`}>{card.value}</p>
+            </Link>
+          )
+        })}
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">

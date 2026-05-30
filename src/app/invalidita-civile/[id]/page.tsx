@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, Edit, FileText, User, Calendar, Stethoscope, AlertCircle, CheckCircle } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
+import { CaseCollaboration } from '@/components/invalidita/CaseCollaboration'
+import { getOrCreateUserProfile } from '@/lib/user-profile'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/database'
@@ -57,6 +59,10 @@ export default async function InvaliditaDetailPage({ params }: PageProps) {
   if (error || !caseData) {
     notFound()
   }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  const profile = user ? await getOrCreateUserProfile(user) : null
+  const canInvite = profile ? ['admin', 'operator'].includes(profile.role) : false
 
   const caseDataTyped = caseData as any
   const invalidityDetails = caseDataTyped.invalidity_details as InvalidityDetails | null
@@ -394,6 +400,8 @@ export default async function InvaliditaDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      <CaseCollaboration caseId={caseDataTyped.id} canInvite={canInvite} />
     </div>
   )
 }
