@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, Edit, Trash2, AlertTriangle, CheckCircle, Clock, XCircle, FileText, User, Calendar } from 'lucide-react'
+import { getCaseStatusMeta } from '@/lib/case-workflow'
 
 type CaseItem = {
   id: string

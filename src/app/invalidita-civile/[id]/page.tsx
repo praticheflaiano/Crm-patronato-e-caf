@@ -69,8 +69,9 @@ export default async function InvaliditaDetailPage({ params }: PageProps) {
   const medicalCertificates = (caseDataTyped.medical_certificates || []) as MedicalCertificate[]
   const contact = caseDataTyped.contacts as CaseContact | null
 
-  const assessmentMeta = caseDataTyped.assessment_status 
-    ? ASSESSMENT_LABELS[caseDataTyped.assessment_status] || ASSESSMENT_LABELS['in_corso']
+  const assessmentStatus = (invalidityDetails as { assessment_status?: string } | null)?.assessment_status
+  const assessmentMeta = assessmentStatus
+    ? ASSESSMENT_LABELS[assessmentStatus] || ASSESSMENT_LABELS['in_corso']
     : ASSESSMENT_LABELS['in_corso']
 
   const isExpired = invalidityDetails?.certification_expiry_date 
@@ -265,10 +266,9 @@ export default async function InvaliditaDetailPage({ params }: PageProps) {
                   })()
 
                   return (
-                    <Link 
-                      key={cert.id} 
-                      href={`/invalidita-civile/${caseDataTyped.id}/certificate/${cert.id}`}
-                      className="flex items-center justify-between rounded-lg border border-slate-200 p-4 hover:bg-slate-50"
+                    <div
+                      key={cert.id}
+                      className="flex items-center justify-between rounded-lg border border-slate-200 p-4"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${isCertExpired ? 'bg-red-100 text-red-600' : isCertExpiringSoon ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-600'}`}>
