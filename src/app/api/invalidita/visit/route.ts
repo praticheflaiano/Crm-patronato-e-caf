@@ -71,12 +71,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: error.message }, { status: 500 })
     }
 
-    // Update case with invalidity_details_id
-    await supabaseClient
-      .from('cases')
-      .update({ invalidity_details_id: data.id })
-      .eq('id', caseId)
-
     revalidatePath('/invalidita-civile')
     revalidatePath(`/invalidita-civile/${caseId}`)
 
