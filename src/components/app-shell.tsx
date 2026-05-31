@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { BarChart3, CalendarDays, ClipboardList, FileText, FolderKanban, History, Home, LogOut, Menu, MessageSquare, PlusCircle, Settings, Stethoscope, Users, X } from 'lucide-react'
+import { BarChart3, CalendarDays, ClipboardList, FileText, FolderKanban, HelpCircle, History, Home, LogOut, Menu, MessageSquare, PlusCircle, Settings, Stethoscope, Users, X } from 'lucide-react'
 import NotificationBell from '@/components/notifications/NotificationBell'
 import { GlobalSearch } from '@/components/search/global-search'
 import { logout } from '@/app/login/actions'
@@ -27,6 +27,7 @@ const baseNavItems = [
   { href: '/chat', label: 'Assistente AI', icon: MessageSquare },
   { href: '/audit', label: 'Registro attività', icon: History },
   { href: '/settings', label: 'Impostazioni', icon: Settings },
+  { href: '/guida', label: 'Guida', icon: HelpCircle },
 ]
 
 const bottomNavItems = [
@@ -58,7 +59,7 @@ export function AppShell({ children, userLabel, organizationName, roleLabel, isD
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed left-4 top-4 z-[60] flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white shadow-lg md:hidden"
+        className="fixed left-4 top-4 z-[60] flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-lg md:hidden"
         aria-label="Apri menu di navigazione"
         aria-expanded={isOpen}
       >
@@ -81,7 +82,7 @@ export function AppShell({ children, userLabel, organizationName, roleLabel, isD
         }`}
       >
         <div className="flex h-20 items-center gap-3 border-b border-slate-200 px-6 pr-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
             <ClipboardList size={21} aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
@@ -111,10 +112,11 @@ export function AppShell({ children, userLabel, organizationName, roleLabel, isD
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium ${
-                  isActive ? 'bg-blue-50 text-blue-700' : doctorClass
+                className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  isActive ? 'bg-primary-soft text-primary' : doctorClass
                 }`}
               >
+                {isActive && <span className="absolute inset-y-2 left-0 w-1 rounded-full bg-primary" aria-hidden="true" />}
                 <Icon size={17} aria-hidden="true" />
                 {item.label}
               </Link>
@@ -141,10 +143,10 @@ export function AppShell({ children, userLabel, organizationName, roleLabel, isD
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 pl-16 md:px-8 md:pl-8">
+        <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white/80 px-4 pl-16 backdrop-blur md:px-8 md:pl-8">
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold uppercase tracking-wide text-slate-500">{organizationName}</h2>
-            <p className="truncate text-xs text-slate-400">Gestione operativa pratiche, scadenze e clienti</p>
+            <h2 className="truncate text-sm font-semibold text-slate-800">{organizationName}</h2>
+            <p className="truncate text-xs text-slate-400">Gestione pratiche, scadenze e clienti</p>
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-4">
             <div className="hidden sm:block">
@@ -161,7 +163,7 @@ export function AppShell({ children, userLabel, organizationName, roleLabel, isD
             const Icon = item.icon
             const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
             return (
-              <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={`flex flex-col items-center gap-1 px-2 py-2 text-[11px] font-semibold ${isActive ? 'text-blue-700' : 'text-slate-500'}`}>
+              <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={`flex flex-col items-center gap-1 px-2 py-2 text-[11px] font-semibold ${isActive ? 'text-primary' : 'text-slate-500'}`}>
                 <Icon size={18} aria-hidden="true" />
                 {item.label}
               </Link>
