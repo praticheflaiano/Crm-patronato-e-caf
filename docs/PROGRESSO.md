@@ -7,16 +7,25 @@ Ultimo aggiornamento: 2026-05-31
 In Impostazioni non era possibile salvare nemmeno il nome profilo
 ("Salvataggio non riuscito").
 
-**Causa**: la migrazione `0021` ha irrobustito `profiles` (REVOKE INSERT/UPDATE a
-livello tabella, lasciando solo il grant di colonna su `full_name`) ma **non ha
-lasciato alcuna policy UPDATE**. Con RLS attiva e nessuna policy UPDATE, ogni
-modifica viene negata.
+**Causa reale (drift del DB)**: la policy di self-update su `profiles` esisteva
+già (`0004`, "Users can update their own profile") e la migrazione `0021`
+*conteneva* il grant di colonna `grant update (full_name) ... to authenticated`
+(riga ~37), ma sul database di produzione quel grant **non era presente**:
+`authenticated` non aveva alcun privilegio UPDATE, quindi la policy permetteva la
+riga ma il controllo dei privilegi SQL falliva comunque.
 
-**Fix** (`0023_profiles_self_update_policy.sql`, applicata al remoto e
-versionata): policy di self-update (`id = auth.uid()` in USING e WITH CHECK).
-L'escalation resta impossibile perché il grant di colonna consente di scrivere
-solo `full_name`; ruolo/organizzazione/stato si cambiano solo via
-`approve_member()`. Verificato con update impersonato in produzione.
+**Fix**:
+- `0023_profiles_self_update_policy.sql` — primo tentativo, ipotizzava una policy
+  mancante (ipotesi errata): ha solo aggiunto una policy duplicata, innocua.
+- `0024_profiles_grant_update_fullname.sql` — fix vero: ri-concede
+  `update (full_name)` ad `authenticated` (idempotente) e rimuove la policy
+  duplicata di `0023`. Applicata al remoto e versionata.
+
+L'escalation resta impossibile: solo `full_name` è scrivibile; ruolo/
+organizzazione/stato non hanno grant di colonna e si cambiano solo via
+`approve_member()`. Verificato in produzione con update impersonato della riga
+reale (ritorna la riga aggiornata; il tentativo di cambiare `role` viene negato
+con insufficient_privilege).
 
 Nota: il pannello "Stato configurazione" (OpenRouter, service role) è di sola
 diagnostica — riporta solo se la chiave è presente. La chiave OpenRouter è la
