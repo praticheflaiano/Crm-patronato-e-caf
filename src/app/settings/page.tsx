@@ -44,6 +44,7 @@ export default async function SettingsPage() {
   const systemChecks = profile.role === 'admin' ? getSystemChecks() : []
   let openRouterConfigured = false
   let openRouterSource: 'db' | 'env' | 'none' = 'none'
+  let openRouterModel = ''
   if (profile.role === 'admin') {
     const { data } = await supabase
       .from('profiles')
@@ -51,15 +52,17 @@ export default async function SettingsPage() {
       .eq('organization_id', profile.organization_id)
     members = Array.isArray(data) ? (data as ProfileRecord[]) : []
 
-    // Determine the OpenRouter key status without exposing the value to the client.
+    // Determine the OpenRouter key status without exposing the key value to the
+    // client; the model id is not secret and is pre-filled into the form.
     let hasDbKey = false
     if (profile.organization_id) {
       const { data: settings } = await supabase
         .from('app_settings')
-        .select('openrouter_api_key')
+        .select('openrouter_api_key, openrouter_model')
         .eq('organization_id', profile.organization_id)
         .maybeSingle()
       hasDbKey = Boolean((settings as ProfileRecord | null)?.openrouter_api_key)
+      openRouterModel = String((settings as ProfileRecord | null)?.openrouter_model ?? '')
     }
     const hasEnvKey = Boolean(process.env.OPENROUTER_API_KEY)
     openRouterConfigured = hasDbKey || hasEnvKey
@@ -145,7 +148,7 @@ export default async function SettingsPage() {
               Incolla qui la chiave API OpenRouter per attivare la chat AI. La chiave dell&apos;app ha
               priorità sull&apos;eventuale variabile d&apos;ambiente.
             </p>
-            <OpenRouterKeyForm configured={openRouterConfigured} source={openRouterSource} />
+            <OpenRouterKeyForm configured={openRouterConfigured} source={openRouterSource} currentModel={openRouterModel} />
           </div>
         </section>
       )}
