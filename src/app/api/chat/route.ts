@@ -3,6 +3,7 @@ import { convertToModelMessages, streamText, type UIMessage } from 'ai'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { getOrCreateUserProfile } from '@/lib/user-profile'
+import { buildCaseContext } from '@/lib/ai-context'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -128,10 +129,9 @@ export async function POST(req: Request) {
     return new Response('Assistente AI non configurato: aggiungi la chiave OpenRouter nelle Impostazioni.', { status: 503 })
   }
 
-  // RAG Logic would go here in the future:
-  // 1. Generate embedding for the last user message
-  // 2. Query Supabase pgvector for relevant context
-  // 3. Append context to the system prompt
+  // Ground the assistant in the user's real cases. Read with the authenticated
+  // client so RLS applies: the assistant only ever sees what this user can see.
+  const caseContext = await buildCaseContext(supabase)
 
   const openrouter = createOpenAI({
     apiKey: openRouterApiKey,
@@ -149,7 +149,9 @@ export async function POST(req: Request) {
       system: `Sei l'assistente virtuale del CAF, Patronato e TARI "Centro Pratiche Flaiano".
       Il tuo compito è aiutare gli operatori a gestire pratiche, consultare documentazione e rispondere a domande normative.
       Se la richiesta riguarda TARI Roma/AMA, privilegia sempre le fonti ufficiali AMA Roma e Roma Capitale e segnala quando un dato va verificato sul portale ufficiale.
-      Rispondi in italiano, in modo operativo e sintetico. Non fornire mai diagnosi mediche. Se non conosci una risposta, dillo chiaramente.`,
+      Rispondi in italiano, in modo operativo e sintetico. Non fornire mai diagnosi mediche. Se non conosci una risposta, dillo chiaramente.
+
+${caseContext}`,
       messages: await convertToModelMessages(safeMessages as UIMessage[]),
     })
 
