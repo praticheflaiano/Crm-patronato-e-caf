@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { getSupabasePublishableKey, getSupabaseUrl } from '@/utils/supabase/config'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -11,8 +12,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/access?error=no_token', requestUrl.origin))
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://xjchklrrmyavizozhtpb.supabase.co'
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2hrbHJteW12aW96aHRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NzYzMDcsImV4cCI6MjA5NDE1MjMwN30.-jwzje0VXfmysMIff5yV_iYbpd7ndw1YEtM4Les30ok'
+  const supabaseUrl = getSupabaseUrl()
+  const supabaseKey = getSupabasePublishableKey()
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Auth callback: Supabase environment variables are not configured')
+    return NextResponse.redirect(new URL('/error', requestUrl.origin))
+  }
+
+  // verifyOtp requires the same email that was used to request the token.
+  // Require it explicitly from the request — never default to a hardcoded address.
+  const email = requestUrl.searchParams.get('email')
+  if (!email) {
+    return NextResponse.redirect(new URL('/access?error=no_email', requestUrl.origin))
+  }
 
   // Create a response that redirects to home
   const response = NextResponse.redirect(new URL(redirectTo, requestUrl.origin))
@@ -33,10 +46,6 @@ export async function GET(request: NextRequest) {
   })
 
   // Verify the OTP token to establish the session
-  // Note: verifyOtp requires the same email that was used to request the token
-  // The token itself contains the email, so we pass it through the form data
-  const email = requestUrl.searchParams.get('email') || 'praticheflaiano@gmail.com'
-  
   const { data: authData, error: verifyError } = await supabase.auth.verifyOtp({
     email: email,
     token,

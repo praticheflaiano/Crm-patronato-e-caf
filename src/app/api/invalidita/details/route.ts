@@ -47,6 +47,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: 'Non autorizzato a gestire dettagli invalidità' }, { status: 403 })
     }
 
+    // Admin/operator: ensure the target case belongs to the same organization
+    // before attaching sensitive health data.
+    if (typedProfile.role !== 'doctor') {
+      const { data: caseOrgRaw } = await (supabase as any)
+        .from('cases')
+        .select('organization_id')
+        .eq('id', caseId)
+        .single()
+
+      const caseOrg = caseOrgRaw as { organization_id: string | null } | null
+      if (!caseOrg || caseOrg.organization_id !== typedProfile.organization_id) {
+        return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
+      }
+    }
+
     // Check if invalidity_details already exists for this case
     const { data: existingDetails } = await (supabase as any)
       .from('invalidity_details')
@@ -127,11 +142,11 @@ export async function PATCH(request: Request) {
 
     const { data: profile } = await (supabase as any)
       .from('profiles')
-      .select('role')
+      .select('role, organization_id')
       .eq('id', user.id)
       .single()
 
-    const typedProfile = profile as { role: string } | null
+    const typedProfile = profile as { role: string; organization_id: string } | null
 
     if (!typedProfile) {
       return NextResponse.json({ ok: false, message: 'Profilo non trovato' }, { status: 404 })
@@ -151,6 +166,20 @@ export async function PATCH(request: Request) {
 
     if (!existingDetails) {
       return NextResponse.json({ ok: false, message: 'Dettagli non trovati' }, { status: 404 })
+    }
+
+    // Admin/operator: ensure the target case belongs to the same organization.
+    if (typedProfile.role !== 'doctor') {
+      const { data: caseOrgRaw } = await (supabase as any)
+        .from('cases')
+        .select('organization_id')
+        .eq('id', caseId)
+        .single()
+
+      const caseOrg = caseOrgRaw as { organization_id: string | null } | null
+      if (!caseOrg || caseOrg.organization_id !== typedProfile.organization_id) {
+        return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
+      }
     }
 
     // Check if the case is assigned to this doctor

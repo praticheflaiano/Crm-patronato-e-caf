@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { getSafeErrorMessage } from '@/lib/supabase-errors'
 
 // Structured requests between operator and doctor (e.g. "serve certificato aggiornato").
 export async function GET(request: Request) {
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
     .eq('case_id', caseId)
     .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: getSafeErrorMessage(error) }, { status: 500 })
   return NextResponse.json(Array.isArray(data) ? data : [])
 }
 
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
     .select('id, title, details, status, requested_by, assigned_to, created_at, resolved_at')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: getSafeErrorMessage(error) }, { status: 500 })
   return NextResponse.json(data)
 }
 
@@ -71,6 +72,6 @@ export async function PATCH(request: Request) {
     .select('id, title, details, status, requested_by, assigned_to, created_at, resolved_at')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: getSafeErrorMessage(error) }, { status: 500 })
   return NextResponse.json(data)
 }

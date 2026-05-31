@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { getSafeErrorMessage } from '@/lib/supabase-errors'
 
 // Shared message board between operators and the invited certifying doctor.
 export async function GET(request: Request) {
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
     .eq('case_id', caseId)
     .order('created_at', { ascending: true })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: getSafeErrorMessage(error) }, { status: 500 })
 
   const messages = Array.isArray(data) ? data : []
   const authorIds = [...new Set(messages.map((m: any) => m.author_id).filter(Boolean))]
@@ -57,6 +58,6 @@ export async function POST(request: Request) {
     .select('id, body, author_id, created_at')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: getSafeErrorMessage(error) }, { status: 500 })
   return NextResponse.json({ ...data, is_me: true })
 }
