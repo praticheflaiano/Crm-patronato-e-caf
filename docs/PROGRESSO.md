@@ -2,6 +2,20 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Memoria della chat AI (2026-05-31)
+
+La conversazione con l'assistente si svuotava uscendo dalla sezione (viveva solo
+nello stato React). Ora è **persistente**:
+
+- La pagina `/chat` salva la conversazione in `localStorage` (chiave
+  `caf-assistant-chat-v1`) e la ripristina al rientro o al ricaricamento.
+- `useChat` viene inizializzato con i messaggi salvati; il salvataggio avviene
+  quando lo stream è concluso (turni completi), non a metà risposta.
+- Pulsante **"Nuova chat"** per azzerare la conversazione; auto-scroll all'ultimo
+  messaggio.
+- Persistenza **solo lato browser** (nessun salvataggio sul server), così il
+  contesto delle pratiche non viene archiviato nel backend.
+
 ## Assistente AI con accesso alle pratiche (2026-05-31)
 
 L'assistente AI ora risponde sui dati reali invece che "alla cieca".
