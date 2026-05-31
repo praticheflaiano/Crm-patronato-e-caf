@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
@@ -31,18 +31,25 @@ export default async function NewCertificatePage({ params }: PageProps) {
     redirect('/')
   }
 
-  // If doctor, verify they're assigned to this case
+  // If doctor, verify they're a collaborator on this case (source of truth)
   if (profile.role === 'doctor') {
+    const { data: membership } = await (supabase as any)
+      .from('case_collaborators')
+      .select('id')
+      .eq('case_id', caseId)
+      .eq('user_id', user.id)
+      .eq('role', 'doctor')
+      .maybeSingle()
+
+    // Ensure the case is actually an invalidità civile case
     const { data: caseData } = await supabase
       .from('cases')
-      .select('doctor_id')
+      .select('id')
       .eq('id', caseId)
       .eq('type', 'invalidita_civile')
       .single()
 
-    const caseDataTyped = caseData as { doctor_id: string | null } | null
-
-    if (!caseDataTyped || caseDataTyped.doctor_id !== user.id) {
+    if (!membership || !caseData) {
       notFound()
     }
   } else {

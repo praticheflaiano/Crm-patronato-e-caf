@@ -143,17 +143,17 @@ export async function PATCH(request: Request) {
       }
     }
 
-    // If doctor, verify assignment
+    // If doctor, verify they're a collaborator on this case (source of truth)
     if (profile.role === 'doctor') {
-      const { data: caseDataRaw } = await supabase
-        .from('cases')
-        .select('doctor_id')
-        .eq('id', caseId)
-        .single()
+      const { data: membership } = await supabaseClient
+        .from('case_collaborators')
+        .select('id')
+        .eq('case_id', caseId)
+        .eq('user_id', user.id)
+        .eq('role', 'doctor')
+        .maybeSingle()
 
-      const caseData = caseDataRaw as { doctor_id: string | null } | null
-
-      if (caseData?.doctor_id !== user.id) {
+      if (!membership) {
         return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
       }
     }

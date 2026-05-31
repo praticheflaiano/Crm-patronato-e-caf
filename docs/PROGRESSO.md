@@ -1,6 +1,42 @@
 # Progresso CRM Patronato e CAF
 
-Ultimo aggiornamento: 2026-05-30
+Ultimo aggiornamento: 2026-05-31
+
+## Sprint sicurezza onboarding & multi-medico (2026-05-31)
+
+### Approvazione account da parte dell'admin
+
+In precedenza chiunque si registrava otteneva automaticamente un profilo
+`operator` con accesso completo all'organizzazione, e qualsiasi utente
+autenticato poteva modificare il proprio `role`/`organization_id` (escalation di
+privilegi). Ora:
+
+- Migrazioni `onboarding_*`:
+  - Nuova colonna `profiles.status` (`pending` / `active` / `disabled`); i membri
+    esistenti sono stati impostati su `active`.
+  - `profiles.organization_id` reso nullable: un account in attesa non ha
+    organizzazione, quindi tutte le policy `organization_id IN (...)` lo escludono
+    automaticamente (nessuna riscrittura delle policy operative).
+  - Trigger `on_auth_user_created` → `handle_new_user()`: ogni nuovo utente nasce
+    `pending`, senza organizzazione e con ruolo minimo.
+  - `REVOKE INSERT/UPDATE` sui campi sensibili di `profiles` (clienti possono
+    aggiornare solo `full_name`). L'unico modo per assegnare ruolo/org/stato è la
+    funzione `security definer` `approve_member()`, protetta da `is_active_admin()`.
+- App:
+  - `getOrCreateUserProfile` ora è in sola lettura ed espone `status`.
+  - Layout: schermata `PendingApproval` per account in attesa o sospesi.
+  - Nuova pagina admin `/admin/utenti` per approvare/rifiutare registrazioni e
+    gestire ruoli e sospensioni.
+
+### Più medici per pratica
+
+La dashboard medico filtrava per la singola colonna `cases.doctor_id`, che veniva
+sovrascritta a ogni invito: solo l'ultimo medico vedeva la pratica. Ora l'accesso
+dei medici si basa sulla tabella `case_collaborators` (`role='doctor'`), coerente
+con le policy RLS `is_case_collaborator`, così più medici possono collaborare sulla
+stessa pratica. Modifiche solo applicative (nessuna migrazione).
+
+Ultimo aggiornamento precedente: 2026-05-30
 
 ## Sprint qualità & funzionalità (2026-05-30)
 

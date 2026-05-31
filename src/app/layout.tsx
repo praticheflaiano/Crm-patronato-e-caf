@@ -3,8 +3,9 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { createClient } from '@/utils/supabase/server'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
-import { formatRole, getOrCreateUserProfile } from '@/lib/user-profile'
+import { formatRole, getOrCreateUserProfile, isActiveMember } from '@/lib/user-profile'
 import { AppShell } from '@/components/app-shell'
+import { PendingApproval } from '@/components/pending-approval'
 import { ToastProvider } from '@/components/ui/toast'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -24,6 +25,9 @@ export default async function RootLayout({
     ? (await (await createClient()).auth.getUser()).data.user
     : null
   const profile = user ? await getOrCreateUserProfile(user) : null
+  // Signed-in but not yet approved (or revoked): block the whole app. RLS already
+  // denies these accounts any organization data — this is the matching UX gate.
+  const showPendingGate = !!user && !isActiveMember(profile)
 
   return (
     <html lang="it">
@@ -35,12 +39,18 @@ export default async function RootLayout({
           Salta al contenuto
         </a>
         <ToastProvider>
-          {isConfigured && user ? (
+          {isConfigured && user && showPendingGate ? (
+            <PendingApproval
+              userLabel={profile?.full_name || user.email || 'Utente CRM'}
+              variant={profile?.status === 'disabled' ? 'disabled' : 'pending'}
+            />
+          ) : isConfigured && user ? (
             <AppShell
               userLabel={profile?.full_name || user.email || 'Utente CRM'}
               organizationName={profile?.organization_name ?? 'CRM CAF e Patronato'}
               roleLabel={profile ? formatRole(profile.role) : 'Profilo in configurazione'}
               isDoctor={profile?.role === 'doctor'}
+              isAdmin={profile?.role === 'admin'}
             >
               {children}
             </AppShell>

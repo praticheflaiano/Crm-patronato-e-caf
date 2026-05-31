@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { BarChart3, CalendarDays, ClipboardList, FileText, FolderKanban, HelpCircle, History, Home, LogOut, Menu, MessageSquare, PlusCircle, Settings, Stethoscope, Users, X } from 'lucide-react'
+import { BarChart3, CalendarDays, ClipboardList, FileText, FolderKanban, HelpCircle, History, Home, LogOut, Menu, MessageSquare, PlusCircle, Settings, Stethoscope, UserCog, Users, X } from 'lucide-react'
 import NotificationBell from '@/components/notifications/NotificationBell'
 import { GlobalSearch } from '@/components/search/global-search'
 import { logout } from '@/app/login/actions'
@@ -14,6 +14,7 @@ type AppShellProps = {
   organizationName: string
   roleLabel: string
   isDoctor: boolean
+  isAdmin: boolean
 }
 
 const baseNavItems = [
@@ -38,7 +39,7 @@ const bottomNavItems = [
   { href: '/cases/new', label: 'Nuova', icon: PlusCircle },
 ]
 
-export function AppShell({ children, userLabel, organizationName, roleLabel, isDoctor }: AppShellProps) {
+export function AppShell({ children, userLabel, organizationName, roleLabel, isDoctor, isAdmin }: AppShellProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
@@ -50,9 +51,13 @@ export function AppShell({ children, userLabel, organizationName, roleLabel, isD
     }
   }, [isOpen])
 
-  const navItems = isDoctor
-    ? [...baseNavItems, { href: '/medico/dashboard', label: 'Dashboard Medico', icon: Stethoscope }]
-    : baseNavItems
+  let navItems = baseNavItems
+  if (isAdmin) {
+    navItems = [...navItems, { href: '/admin/utenti', label: 'Gestione utenti', icon: UserCog }]
+  }
+  if (isDoctor) {
+    navItems = [...navItems, { href: '/medico/dashboard', label: 'Dashboard Medico', icon: Stethoscope }]
+  }
 
   return (
     <div className="flex h-dvh overflow-hidden bg-slate-100">

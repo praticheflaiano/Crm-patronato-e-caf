@@ -34,7 +34,20 @@ export default async function DoctorEditCasePage({ params }: PageProps) {
     redirect('/')
   }
 
-  // Fetch case with details, ensuring doctor has access
+  // Ensure the doctor is a collaborator on this case (source of truth)
+  const { data: membership } = await (supabase as any)
+    .from('case_collaborators')
+    .select('id')
+    .eq('case_id', id)
+    .eq('user_id', user.id)
+    .eq('role', 'doctor')
+    .maybeSingle()
+
+  if (!membership) {
+    notFound()
+  }
+
+  // Fetch case with details
   const { data: caseData, error } = await supabase
     .from('cases')
     .select(`
@@ -43,7 +56,6 @@ export default async function DoctorEditCasePage({ params }: PageProps) {
     `)
     .eq('id', id)
     .eq('type', 'invalidita_civile')
-    .eq('doctor_id', user.id)
     .single()
 
   if (error || !caseData) {

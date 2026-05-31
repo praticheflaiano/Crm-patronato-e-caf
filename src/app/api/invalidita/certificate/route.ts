@@ -55,17 +55,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: 'Non autorizzato a gestire certificati medici' }, { status: 403 })
     }
 
-    // If doctor, verify they're assigned to this case
+    // If doctor, verify they're a collaborator on this case (source of truth)
     if (profile.role === 'doctor') {
-      const { data: caseDataRaw } = await supabase
-        .from('cases')
-        .select('doctor_id')
-        .eq('id', caseId)
-        .single()
+      const { data: membership } = await (supabase as any)
+        .from('case_collaborators')
+        .select('id')
+        .eq('case_id', caseId)
+        .eq('user_id', user.id)
+        .eq('role', 'doctor')
+        .maybeSingle()
 
-      const caseData = caseDataRaw as { doctor_id: string | null } | null
-
-      if (caseData?.doctor_id !== user.id) {
+      if (!membership) {
         return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
       }
     } else {
@@ -216,17 +216,17 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ ok: false, message: 'Certificato non trovato' }, { status: 404 })
     }
 
-    // If doctor, verify they're assigned to this case
+    // If doctor, verify they're a collaborator on this case (source of truth)
     if (profile.role === 'doctor') {
-      const { data: caseDataRaw } = await (supabase as any)
-        .from('cases')
-        .select('doctor_id')
-        .eq('id', existingCert.case_id)
-        .single()
+      const { data: membership } = await (supabase as any)
+        .from('case_collaborators')
+        .select('id')
+        .eq('case_id', existingCert.case_id)
+        .eq('user_id', user.id)
+        .eq('role', 'doctor')
+        .maybeSingle()
 
-      const caseData = caseDataRaw as { doctor_id: string | null } | null
-
-      if (caseData?.doctor_id !== user.id) {
+      if (!membership) {
         return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
       }
     } else {

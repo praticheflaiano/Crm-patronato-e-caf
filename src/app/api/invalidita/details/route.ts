@@ -182,17 +182,17 @@ export async function PATCH(request: Request) {
       }
     }
 
-    // Check if the case is assigned to this doctor
+    // Check if the doctor is a collaborator on this case (source of truth)
     if (typedProfile.role === 'doctor') {
-      const { data: caseDataRaw } = await (supabase as any)
-        .from('cases')
-        .select('doctor_id')
-        .eq('id', caseId)
-        .single()
+      const { data: membership } = await (supabase as any)
+        .from('case_collaborators')
+        .select('id')
+        .eq('case_id', caseId)
+        .eq('user_id', user.id)
+        .eq('role', 'doctor')
+        .maybeSingle()
 
-      const caseData = caseDataRaw as { doctor_id: string | null } | null
-
-      if (caseData?.doctor_id !== user.id) {
+      if (!membership) {
         return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
       }
     }
