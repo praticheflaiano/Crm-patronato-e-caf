@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: TaskNotesRouteContext) {
 
   const { data, error } = await supabase
     .from('task_notes')
-    .select('*, profiles(id, first_name, last_name)')
+    .select('*, profiles(id, full_name)')
     .eq('task_id', taskId)
     .order('created_at', { ascending: true })
 
@@ -51,7 +51,7 @@ export async function POST(request: Request, { params }: TaskNotesRouteContext) 
   const { data, error } = await supabase
     .from('task_notes')
     .insert(note as never)
-    .select('*, profiles(id, first_name, last_name)')
+    .select('*, profiles(id, full_name)')
 
   if (error) {
     return NextResponse.json({ error: getSafeErrorMessage(error) }, { status: 500 })
@@ -77,7 +77,7 @@ export async function PATCH(request: Request) {
     .update({ content: String(payload.content).trim(), updated_at: new Date().toISOString() } as never)
     .eq('id', payload.id)
     .eq('author_id', user.id)
-    .select('*, profiles(id, first_name, last_name)')
+    .select('*, profiles(id, full_name)')
 
   if (error) {
     return NextResponse.json({ error: getSafeErrorMessage(error) }, { status: 500 })

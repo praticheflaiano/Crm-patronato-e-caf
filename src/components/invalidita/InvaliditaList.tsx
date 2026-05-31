@@ -187,7 +187,7 @@ export function InvaliditaList({ cases, isDoctorView = false }: InvaliditaListPr
                     )}
                   </div>
                   <span className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ring-1 ring-inset ${statusBadge.bg} ${statusBadge.text}`}>
-                    {caseItem.status.replace('_', ' ')}
+                    {getCaseStatusMeta(caseItem.status).label}
                   </span>
                 </div>
                 
@@ -318,7 +318,7 @@ export function InvaliditaList({ cases, isDoctorView = false }: InvaliditaListPr
                       <td className="whitespace-nowrap px-5 py-4">
                         <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusBadge.bg} ${statusBadge.text}`}>
                           <StatusIcon size={12} aria-hidden="true" />
-                          {caseItem.status.replace('_', ' ')}
+                          {getCaseStatusMeta(caseItem.status).label}
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-5 py-4">
