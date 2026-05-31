@@ -1,5 +1,6 @@
 import { getCaseStatusLabel, getCaseTypeLabel } from '@/lib/case-workflow'
 import { formatDateIt } from '@/lib/date-utils'
+import { embedQuery } from '@/lib/embeddings'
 
 // Builds a compact, plain-text summary of the user's cases to ground the AI
 // assistant in real data. IMPORTANT: it queries with the caller's authenticated
@@ -69,4 +70,44 @@ export async function buildCaseContext(supabase: any): Promise<string> {
     ...lines,
     'Usa questi dati per rispondere a domande su pratiche, cittadini e scadenze. Non inventare pratiche non elencate. Non dedurre né commentare informazioni sanitarie/diagnosi.',
   ].join('\n')
+}
+
+// Retrieves the knowledge-base chunks most relevant to the user's question
+// (RAG). Embeds the query with the key-less `embed` Edge Function and runs the
+// org-scoped similarity search. Returns '' when there is no knowledge base or no
+// relevant match, so the prompt stays clean.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function buildKnowledgeContext(supabase: any, query: string): Promise<string> {
+  const trimmed = query.trim()
+  if (!trimmed) return ''
+
+  const embedding = await embedQuery(supabase, trimmed)
+  if (!embedding) return ''
+
+  let matches: AnyRecord[] = []
+  try {
+    const { data, error } = await supabase.rpc('match_knowledge_chunks', {
+      query_embedding: embedding,
+      match_count: 5,
+      similarity_threshold: 0.3,
+    })
+    if (error) return ''
+    matches = asArray(data)
+  } catch {
+    return ''
+  }
+
+  if (matches.length === 0) return ''
+
+  const blocks = matches.map((m, i) => {
+    const title = String(m.document_title ?? 'documento')
+    const content = String(m.content ?? '').trim()
+    return `[${i + 1}] (fonte: ${title})\n${content}`
+  })
+
+  return [
+    'CONOSCENZA INTERNA (estratti dai documenti caricati dall\'organizzazione, pertinenti alla domanda):',
+    ...blocks,
+    'Usa questi estratti come fonte prioritaria quando rispondi. Cita la fonte tra parentesi quando ti basi su di essi. Se non contengono la risposta, dillo e non inventare.',
+  ].join('\n\n')
 }

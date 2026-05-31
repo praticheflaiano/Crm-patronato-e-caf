@@ -2,6 +2,40 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Knowledge base + RAG + memoria chat su DB — Fase 1/2/3 (2026-05-31)
+
+Implementato il motore RAG e la sezione Conoscenza richiesti.
+
+### Motore embedding (gratuito, senza chiave)
+- Edge Function Supabase `embed`: modello integrato `gte-small` (384 dim),
+  nessuna API key, gira sull'infrastruttura Supabase. JWT obbligatorio.
+- pgvector 0.8.0 (già installato) per la ricerca di similarità.
+
+### Schema (`0027_knowledge_base_and_chat_memory.sql`)
+- `knowledge_documents` + `knowledge_chunks` (con `embedding vector(384)` e
+  indice HNSW cosine), RLS per organizzazione.
+- `match_knowledge_chunks()`: ricerca per similarità, hard-scoped
+  `current_user_org_id()` (niente leak cross-org). Verificata end-to-end sul
+  remoto (match a similarità 1.000, dati di test rolled back).
+- `chat_conversations` + `chat_messages` per la memoria chat su DB (RLS per
+  utente). [Cablaggio UI della cronologia server-side: prossima iterazione.]
+
+### Sezione Conoscenza (`/knowledge`)
+- Upload PDF / Word (.docx) / testo (estrazione con pdf-parse v2 e mammoth) +
+  incolla-testo; chunking con overlap; embedding e indicizzazione via API
+  `/api/knowledge`. Elenco con stato (indicizzato/elaborazione/errore) ed
+  eliminazione. Voce di menu "Conoscenza".
+
+### RAG nella chat
+- `/api/chat` ora recupera i frammenti più pertinenti alla domanda
+  (`buildKnowledgeContext`: embed query → `match_knowledge_chunks`) e li inietta
+  nel system prompt come fonte prioritaria, con citazione della fonte.
+
+Nota: l'estrazione testo da PDF in serverless è l'unico punto non testabile
+end-to-end da qui (richiede file reali) — collaudo finale upload sull'app.
+Memoria chat: le tabelle sono pronte; la chat resta per ora persistente lato
+browser (localStorage) finché non si collega la cronologia server-side.
+
 ## Memoria della chat AI (2026-05-31)
 
 La conversazione con l'assistente si svuotava uscendo dalla sezione (viveva solo

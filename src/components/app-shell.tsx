@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { BarChart3, CalendarDays, ClipboardList, FileText, FolderKanban, HelpCircle, History, Home, LogOut, Menu, MessageSquare, PlusCircle, Settings, Stethoscope, UserCog, Users, X } from 'lucide-react'
+import { BarChart3, BookOpen, CalendarDays, ClipboardList, FileText, FolderKanban, HelpCircle, History, Home, LogOut, Menu, MessageSquare, PlusCircle, Settings, Stethoscope, UserCog, Users, X } from 'lucide-react'
 import NotificationBell from '@/components/notifications/NotificationBell'
 import { GlobalSearch } from '@/components/search/global-search'
 import { logout } from '@/app/login/actions'
@@ -26,6 +26,7 @@ const baseNavItems = [
   { href: '/invalidita-civile', label: 'Invalidità Civile', icon: FolderKanban },
   { href: '/report', label: 'Report', icon: BarChart3 },
   { href: '/chat', label: 'Assistente AI', icon: MessageSquare },
+  { href: '/knowledge', label: 'Conoscenza', icon: BookOpen },
   { href: '/audit', label: 'Registro attività', icon: History },
   { href: '/settings', label: 'Impostazioni', icon: Settings },
   { href: '/guida', label: 'Guida', icon: HelpCircle },
