@@ -3,7 +3,7 @@ import { convertToModelMessages, streamText, type UIMessage } from 'ai'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { getOrCreateUserProfile } from '@/lib/user-profile'
-import { buildCaseContext } from '@/lib/ai-context'
+import { buildCaseContext, buildKnowledgeContext } from '@/lib/ai-context'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -133,6 +133,17 @@ export async function POST(req: Request) {
   // client so RLS applies: the assistant only ever sees what this user can see.
   const caseContext = await buildCaseContext(supabase)
 
+  // RAG: pull the most relevant knowledge-base extracts for the latest question.
+  const lastUserMessage = [...safeMessages].reverse().find((m) => m.role === 'user')
+  const lastParts: unknown = lastUserMessage?.parts
+  const lastUserText = Array.isArray(lastParts)
+    ? lastParts
+        .filter((p): p is { type: string; text?: string } => Boolean(p) && (p as { type?: string }).type === 'text')
+        .map((p) => p.text ?? '')
+        .join(' ')
+    : String(lastUserMessage?.content ?? '')
+  const knowledgeContext = await buildKnowledgeContext(supabase, lastUserText)
+
   const openrouter = createOpenAI({
     apiKey: openRouterApiKey,
     baseURL: 'https://openrouter.ai/api/v1',
@@ -151,7 +162,7 @@ export async function POST(req: Request) {
       Se la richiesta riguarda TARI Roma/AMA, privilegia sempre le fonti ufficiali AMA Roma e Roma Capitale e segnala quando un dato va verificato sul portale ufficiale.
       Rispondi in italiano, in modo operativo e sintetico. Non fornire mai diagnosi mediche. Se non conosci una risposta, dillo chiaramente.
 
-${caseContext}`,
+${caseContext}${knowledgeContext ? `\n\n${knowledgeContext}` : ''}`,
       messages: await convertToModelMessages(safeMessages as UIMessage[]),
     })
 
