@@ -2,6 +2,44 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Completamento funzionale pre-pubblicazione (2026-05-31)
+
+Audit finale per rendere il CRM pienamente funzionante in ogni sua parte, prima
+della pubblicazione in produzione.
+
+### Assistente AI riparato (era completamente rotto)
+
+La pagina chat usava la vecchia API di `useChat` (`input`, `handleInputChange`,
+`handleSubmit`, `m.content`) mascherata con `as any`, ma il progetto monta
+**AI SDK v6** (`ai@6`, `@ai-sdk/react@3`), dove quell'API non esiste più: a
+runtime il campo di input era **non digitabile** e i messaggi si renderizzavano
+**vuoti** → assistente del tutto inutilizzabile.
+
+- Client (`src/app/chat/page.tsx`): riscritto sull'API v6 — `useChat()` con
+  `sendMessage`/`status`, input gestito in locale, testo letto da `message.parts`.
+- Server (`src/app/api/chat/route.ts`): i messaggi UI in arrivo ora passano per
+  `convertToModelMessages()` e la risposta usa `toUIMessageStreamResponse()`
+  (protocollo UI message stream), coerente col transport di default del client.
+  Mantenuti auth, rate limiting e validazione input già presenti.
+
+### Centro notifiche reso operativo
+
+Il sistema notifiche aveva lettura/segna-letto/eliminazione e realtime completi,
+ma **nessun punto dell'app creava notifiche** → la campanella restava sempre
+vuota. Aggiunto helper best-effort `src/lib/notifications.ts` (`notifyUser`,
+non blocca mai l'azione che lo scatena) e collegato agli eventi a destinatario
+univoco del flusso medico:
+
+- Invito di un medico a una pratica → notifica al medico.
+- Nuova richiesta su una pratica → notifica al medico assegnato (no auto-notifica).
+
+`organization_id` è impostato dal trigger esistente; la policy SELECT è per
+`user_id`, quindi il medico vede la notifica anche se di organizzazione diversa.
+
+### Verifiche
+
+`npm run lint` ✅ · `npm run build` ✅ (type-check incluso) · `npm test` ✅ 124/124.
+
 ## Sprint sicurezza onboarding & multi-medico (2026-05-31)
 
 ### Approvazione account da parte dell'admin

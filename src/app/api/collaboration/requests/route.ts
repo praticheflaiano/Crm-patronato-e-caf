@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { getSafeErrorMessage } from '@/lib/supabase-errors'
+import { notifyUser } from '@/lib/notifications'
 
 // Structured requests between operator and doctor (e.g. "serve certificato aggiornato").
 export async function GET(request: Request) {
@@ -51,6 +52,18 @@ export async function POST(request: Request) {
     .single()
 
   if (error) return NextResponse.json({ error: getSafeErrorMessage(error) }, { status: 500 })
+
+  // Notify the assigned doctor of the new request (skip self-assignment).
+  if (data?.assigned_to && data.assigned_to !== user.id) {
+    await notifyUser(supabase as any, {
+      userId: data.assigned_to,
+      title: 'Nuova richiesta su una pratica',
+      message: title,
+      type: 'case',
+      relatedId: caseId,
+    })
+  }
+
   return NextResponse.json(data)
 }
 

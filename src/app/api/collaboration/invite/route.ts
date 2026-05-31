@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { getOrCreateUserProfile } from '@/lib/user-profile'
 import { getSafeErrorMessage } from '@/lib/supabase-errors'
+import { notifyUser } from '@/lib/notifications'
 
 // Operators link an external certifying doctor's account to a specific case.
 // The doctor must already have an account; they then get per-case access via RLS.
@@ -54,6 +55,15 @@ export async function POST(request: Request) {
 
   // Keep the existing doctor_id-based features (dashboard, certificate flow) working.
   await (supabase as any).from('cases').update({ doctor_id: target.id }).eq('id', caseId)
+
+  // Let the doctor know they now have a case to follow.
+  await notifyUser(supabase as any, {
+    userId: target.id,
+    title: 'Nuova pratica da seguire',
+    message: 'Sei stato aggiunto come medico certificatore a una pratica di invalidità civile.',
+    type: 'case',
+    relatedId: caseId,
+  })
 
   return NextResponse.json({ ok: true, doctor: { id: target.id, email: target.email } })
 }

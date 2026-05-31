@@ -1,5 +1,5 @@
 import { createOpenAI } from '@ai-sdk/openai'
-import { streamText } from 'ai'
+import { convertToModelMessages, streamText, type UIMessage } from 'ai'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 
@@ -96,10 +96,10 @@ export async function POST(req: Request) {
       Il tuo compito è aiutare gli operatori a gestire pratiche, consultare documentazione e rispondere a domande normative.
       Se la richiesta riguarda TARI Roma/AMA, privilegia sempre le fonti ufficiali AMA Roma e Roma Capitale e segnala quando un dato va verificato sul portale ufficiale.
       Rispondi in italiano, in modo operativo e sintetico. Non fornire mai diagnosi mediche. Se non conosci una risposta, dillo chiaramente.`,
-      messages: safeMessages,
+      messages: await convertToModelMessages(safeMessages as UIMessage[]),
     })
 
-    return result.toTextStreamResponse()
+    return result.toUIMessageStreamResponse()
   } catch (chatError) {
     console.error('OpenRouter chat failed:', chatError instanceof Error ? chatError.message : 'unknown error')
 
