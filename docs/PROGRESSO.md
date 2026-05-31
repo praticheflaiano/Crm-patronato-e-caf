@@ -2,6 +2,21 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Assistente AI con accesso alle pratiche (2026-05-31)
+
+L'assistente AI ora risponde sui dati reali invece che "alla cieca".
+
+- Nuovo helper `src/lib/ai-context.ts` (`buildCaseContext`): legge le pratiche
+  con il **client autenticato** del chiamante, quindi **la RLS si applica** —
+  l'assistente vede solo le pratiche che l'utente è autorizzato a vedere.
+- Riassunto compatto (max 40 pratiche, max 3 scadenze aperte ciascuna): titolo,
+  cittadino, tipo, stato, scadenze aperte. **Nessun dato clinico/diagnosi**
+  (solo metadati amministrativi), coerente col vincolo "mai diagnosi mediche".
+- La rotta `/api/chat` inietta il contesto nel system prompt dopo
+  l'autenticazione. Sostituisce il vecchio placeholder RAG.
+- Verificato in produzione (query RLS impersonata): restituisce le pratiche reali
+  dell'organizzazione. lint/build/type-check/test verdi (124).
+
 ## Selezione modello OpenRouter dall'app (2026-05-31)
 
 Esteso il pannello Impostazioni → Assistente AI: oltre alla chiave, l'admin può
