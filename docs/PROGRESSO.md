@@ -36,6 +36,19 @@ dei medici si basa sulla tabella `case_collaborators` (`role='doctor'`), coerent
 con le policy RLS `is_case_collaborator`, così più medici possono collaborare sulla
 stessa pratica. Modifiche solo applicative (nessuna migrazione).
 
+### Correzioni post-review
+
+- **Ricorsione RLS su `profiles`**: la prima versione della policy admin conteneva
+  una subquery su `profiles` dentro una policy su `profiles` → errore 42P17 a ogni
+  lettura del profilo da parte di un admin (quindi a ogni pagina, via il layout).
+  Risolto con la funzione `security definer` `current_user_org_id()` (stesso schema
+  di `is_case_collaborator`). La policy mostra ora anche gli utenti senza org
+  (pending **e** disabled), così l'admin può riattivare gli account sospesi.
+- **Migrazioni versionate**: lo stato applicato è ora nel repo in
+  `supabase/migrations/0020_onboarding_member_status.sql` e
+  `0021_onboarding_profile_hardening.sql` (idempotenti, stato finale corretto).
+- Test unit `src/lib/__tests__/user-profile.test.ts` per `isActiveMember()`.
+
 Ultimo aggiornamento precedente: 2026-05-30
 
 ## Sprint qualità & funzionalità (2026-05-30)
