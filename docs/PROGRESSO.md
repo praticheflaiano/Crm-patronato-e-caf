@@ -2,6 +2,78 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Chiave OpenRouter configurabile dall'app (2026-05-31)
+
+Richiesta: poter inserire la chiave OpenRouter dall'interfaccia admin invece che
+solo come variabile d'ambiente.
+
+- Nuova tabella `app_settings` (una riga per organizzazione) con
+  `openrouter_api_key`, RLS **solo-admin** dell'organizzazione
+  (`0025_app_settings_openrouter.sql`, applicata al remoto e versionata).
+- Pagina **Impostazioni → Assistente AI (OpenRouter)** (solo admin): form per
+  salvare/rimuovere la chiave (`updateOpenRouterKey` server action). La chiave è
+  scritta lato server e **non viene mai restituita al client** (il campo mostra
+  solo lo stato: salvata nell'app / da variabile d'ambiente / non configurata).
+- La rotta chat risolve la chiave lato server con priorità: chiave dell'app
+  (letta via service-role così funziona per tutti i membri, non solo admin) →
+  variabile d'ambiente `OPENROUTER_API_KEY`. Gli operatori non possono leggere
+  la chiave (RLS solo-admin), ma possono usare l'assistente.
+- Verificato in produzione: upsert admin tramite policy OK; build/lint/type-check
+  verdi.
+
+## Hotfix produzione: salvataggio profilo bloccato (2026-05-31)
+
+In Impostazioni non era possibile salvare nemmeno il nome profilo
+("Salvataggio non riuscito").
+
+**Causa reale (drift del DB)**: la policy di self-update su `profiles` esisteva
+già (`0004`, "Users can update their own profile") e la migrazione `0021`
+*conteneva* il grant di colonna `grant update (full_name) ... to authenticated`
+(riga ~37), ma sul database di produzione quel grant **non era presente**:
+`authenticated` non aveva alcun privilegio UPDATE, quindi la policy permetteva la
+riga ma il controllo dei privilegi SQL falliva comunque.
+
+**Fix**:
+- `0023_profiles_self_update_policy.sql` — primo tentativo, ipotizzava una policy
+  mancante (ipotesi errata): ha solo aggiunto una policy duplicata, innocua.
+- `0024_profiles_grant_update_fullname.sql` — fix vero: ri-concede
+  `update (full_name)` ad `authenticated` (idempotente) e rimuove la policy
+  duplicata di `0023`. Applicata al remoto e versionata.
+
+L'escalation resta impossibile: solo `full_name` è scrivibile; ruolo/
+organizzazione/stato non hanno grant di colonna e si cambiano solo via
+`approve_member()`. Verificato in produzione con update impersonato della riga
+reale (ritorna la riga aggiornata; il tentativo di cambiare `role` viene negato
+con insufficient_privilege).
+
+Nota: il pannello "Stato configurazione" (OpenRouter, service role) è di sola
+diagnostica — riporta solo se la chiave è presente. La chiave OpenRouter è la
+variabile d'ambiente `OPENROUTER_API_KEY` (impostata su Vercel), non
+configurabile dall'interfaccia.
+
+## Hotfix produzione: permission denied is_case_collaborator (2026-05-31)
+
+Subito dopo la pubblicazione, la produzione mostrava
+`Errore nel caricamento dei contatti: permission denied for function
+is_case_collaborator` (e un errore di autenticazione collegato).
+
+**Causa**: la migrazione `0018` aveva revocato `EXECUTE` sugli helper RLS
+`is_case_collaborator` / `is_org_member_of_case` anche da `authenticated`,
+pensando di nasconderli solo dal endpoint RPC PostgREST. Ma sono funzioni
+`SECURITY DEFINER` chiamate **dentro** le policy RLS di contacts, cases,
+documents, case_messages, case_requests, case_collaborators, invalidity_details
+e medical_certificates; le policy vengono valutate come ruolo `authenticated`,
+che quindi deve poterle eseguire. Senza il grant, ogni lettura falliva.
+
+**Fix** (`0022_fix_rls_helper_execute_grants.sql`, applicata al remoto e
+versionata): `grant execute ... to authenticated` su entrambi gli helper,
+mantenendo il revoke da `anon`/`public`. Gli helper riportano solo l'accesso
+del chiamante (filtrano per `auth.uid()`), quindi nessuna esposizione dati.
+`get_doctor_assigned_cases` resta bloccata (non usata da policy né dall'app).
+
+Verificato in produzione impersonando l'admin con ruolo `authenticated`: la
+lettura di `contacts` ora restituisce le righe invece di "permission denied".
+
 ## Completamento funzionale pre-pubblicazione (2026-05-31)
 
 Audit finale per rendere il CRM pienamente funzionante in ogni sua parte, prima

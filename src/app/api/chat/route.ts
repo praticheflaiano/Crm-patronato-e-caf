@@ -1,7 +1,8 @@
 import { createOpenAI } from '@ai-sdk/openai'
 import { convertToModelMessages, streamText, type UIMessage } from 'ai'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
-import { createClient } from '@/utils/supabase/server'
+import { createClient, createAdminClient } from '@/utils/supabase/server'
+import { getOrCreateUserProfile } from '@/lib/user-profile'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -26,6 +27,42 @@ function isRateLimited(userId: string): boolean {
   recent.push(now)
   rateLimitBuckets.set(userId, recent)
   return recent.length > RATE_LIMIT_MAX
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function readKeyFromSettings(client: any, organizationId: string): Promise<string | null> {
+  try {
+    const { data } = await client
+      .from('app_settings')
+      .select('openrouter_api_key')
+      .eq('organization_id', organizationId)
+      .maybeSingle()
+    const key = data?.openrouter_api_key
+    return key ? String(key).trim() || null : null
+  } catch {
+    return null
+  }
+}
+
+// Resolve the OpenRouter key: the in-app, admin-configured key (per organization)
+// takes precedence over the OPENROUTER_API_KEY env var. It is read server-side
+// only, so it is never exposed to the browser. The service-role client is used
+// when available so the assistant works for every member; admins can also read
+// their own org row directly. Falls back to the env var for env-based setups.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function resolveOpenRouterKey(userClient: any, organizationId: string | null): Promise<string | null> {
+  if (organizationId) {
+    try {
+      const admin = createAdminClient()
+      const key = await readKeyFromSettings(admin, organizationId)
+      if (key) return key
+    } catch {
+      // Service role not configured; fall through to the caller's own client.
+    }
+    const key = await readKeyFromSettings(userClient, organizationId)
+    if (key) return key
+  }
+  return process.env.OPENROUTER_API_KEY?.trim() || null
 }
 
 export async function POST(req: Request) {
@@ -68,10 +105,11 @@ export async function POST(req: Request) {
     return new Response('Conversazione troppo lunga. Inizia una nuova chat.', { status: 413 })
   }
 
-  const openRouterApiKey = process.env.OPENROUTER_API_KEY?.trim()
+  const profile = await getOrCreateUserProfile(user)
+  const openRouterApiKey = await resolveOpenRouterKey(supabase, profile?.organization_id ?? null)
 
   if (!openRouterApiKey) {
-    return new Response('Assistente AI non configurato: manca OPENROUTER_API_KEY.', { status: 503 })
+    return new Response('Assistente AI non configurato: aggiungi la chiave OpenRouter nelle Impostazioni.', { status: 503 })
   }
 
   // RAG Logic would go here in the future:
