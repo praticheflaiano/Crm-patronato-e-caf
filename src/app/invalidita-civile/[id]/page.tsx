@@ -298,7 +298,7 @@ export default async function InvaliditaDetailPage({ params }: PageProps) {
                           </p>
                         )}
                       </div>
-                    </Link>
+                    </div>
                   )
                 })}
               </div>
