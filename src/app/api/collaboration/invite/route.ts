@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/utils/supabase/server'
 import { getOrCreateUserProfile } from '@/lib/user-profile'
+import { getSafeErrorMessage } from '@/lib/supabase-errors'
+import { notifyUser } from '@/lib/notifications'
 
 // Operators link an external certifying doctor's account to a specific case.
 // The doctor must already have an account; they then get per-case access via RLS.
@@ -49,10 +51,19 @@ export async function POST(request: Request) {
   const { error: insErr } = await (supabase as any)
     .from('case_collaborators')
     .upsert({ case_id: caseId, user_id: target.id, role: 'doctor', invited_by: user.id }, { onConflict: 'case_id,user_id' })
-  if (insErr) return NextResponse.json({ error: insErr.message }, { status: 500 })
+  if (insErr) return NextResponse.json({ error: getSafeErrorMessage(insErr) }, { status: 500 })
 
   // Keep the existing doctor_id-based features (dashboard, certificate flow) working.
   await (supabase as any).from('cases').update({ doctor_id: target.id }).eq('id', caseId)
+
+  // Let the doctor know they now have a case to follow.
+  await notifyUser(supabase as any, {
+    userId: target.id,
+    title: 'Nuova pratica da seguire',
+    message: 'Sei stato aggiunto come medico certificatore a una pratica di invalidità civile.',
+    type: 'case',
+    relatedId: caseId,
+  })
 
   return NextResponse.json({ ok: true, doctor: { id: target.id, email: target.email } })
 }
@@ -91,7 +102,7 @@ export async function GET(request: Request) {
     .from('case_collaborators')
     .select('id, user_id, role, created_at')
     .eq('case_id', caseId)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: getSafeErrorMessage(error) }, { status: 500 })
 
   const ids = (data ?? []).map((c: any) => c.user_id)
   let names: Record<string, string> = {}

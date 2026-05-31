@@ -1,30 +1,74 @@
 @import "tailwindcss";
 
+/*
+  Design system — "chiaro & arioso" con accento blu evoluto.
+  Token centralizzati: superfici morbide, bordi/anelli tenui, raggi coerenti,
+  e un focus-visible uniforme su tutta l'app.
+*/
 :root {
-  --background: #f6f8fb;
-  --foreground: #111827;
+  --background: #f4f7fb;
+  --foreground: #0f172a;
+
+  /* Accento primario (blu fiducia evoluto) */
+  --primary: #2f5bd6;
+  --primary-hover: #2647ad;
+  --primary-soft: #eaf0fe;
+  --ring: #2f5bd6;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  /* numerali più ordinati e font leggermente più nitido */
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
 }
 
 input,
 select,
 textarea {
   background-color: #ffffff;
-  color: #111827;
+  color: #0f172a;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #9ca3af;
+  color: #94a3b8;
+}
+
+/* Focus-visible uniforme e accessibile su tutta l'app */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* I numeri grandi (KPI, statistiche) con cifre a larghezza fissa */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Animazione tenue per pannelli/tooltip */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.12s ease-out;
 }

@@ -27,28 +27,39 @@ export default async function DoctorDashboardPage() {
     redirect('/')
   }
 
-  // Fetch cases assigned to this doctor
-  const { data: cases, error } = await supabase
-    .from('cases')
-    .select(`
-      id,
-      title,
-      status,
-      created_at,
-      contacts (
-        first_name,
-        last_name
-      ),
-      invalidity_details (
-        disability_type,
-        disability_percentage,
-        assessment_status,
-        certification_expiry_date
-      )
-    `)
-    .eq('type', 'invalidita_civile')
-    .eq('doctor_id', user.id)
-    .order('created_at', { ascending: false })
+  // Fetch the cases where this user is a doctor-collaborator (source of truth).
+  const { data: collab } = await (supabase as any)
+    .from('case_collaborators')
+    .select('case_id')
+    .eq('user_id', user.id)
+    .eq('role', 'doctor')
+
+  const caseIds = (collab ?? []).map((r: any) => r.case_id)
+
+  // Fetch cases assigned to this doctor via collaborator membership
+  const { data: cases, error } = caseIds.length
+    ? await supabase
+        .from('cases')
+        .select(`
+          id,
+          title,
+          status,
+          created_at,
+          contacts (
+            first_name,
+            last_name
+          ),
+          invalidity_details (
+            disability_type,
+            disability_percentage,
+            assessment_status,
+            certification_expiry_date
+          )
+        `)
+        .eq('type', 'invalidita_civile')
+        .in('id', caseIds)
+        .order('created_at', { ascending: false })
+    : { data: [], error: null }
 
   const casesTyped = cases as any[]
 

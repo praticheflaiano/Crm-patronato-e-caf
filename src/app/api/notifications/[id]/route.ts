@@ -8,12 +8,18 @@ export async function GET(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
+  }
+
   const { data, error } = await supabase
     .from('notifications')
     .select('*')
     .eq('id', id)
+    .eq('user_id', user.id)
     .single()
-  
+
   if (error) {
     if (isMissingSchemaResourceError(error)) {
       return NextResponse.json({ ok: false, error: 'Modulo notifiche non ancora migrato' }, { status: 404 })
@@ -30,13 +36,19 @@ export async function PATCH(
 ) {
   const { id } = await params
   const supabase = await createClient()
-  const updateData = await request.json().catch(() => ({}))
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
+  }
+
+  // Only the is_read flag may be updated by the client.
   const { data, error } = await supabase
     .from('notifications')
-    .update({ ...updateData, is_read: true } as never)
+    .update({ is_read: true } as never)
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
-  
+
   if (error) {
     if (isMissingSchemaResourceError(error)) {
       return NextResponse.json({ ok: false, skipped: true, error: 'Modulo notifiche non ancora migrato' })
@@ -53,11 +65,17 @@ export async function DELETE(
 ) {
   const { id } = await params
   const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
+  }
+
   const { error } = await supabase
     .from('notifications')
     .delete()
     .eq('id', id)
-  
+    .eq('user_id', user.id)
+
   if (error) {
     if (isMissingSchemaResourceError(error)) {
       return NextResponse.json({ ok: false, skipped: true, error: 'Modulo notifiche non ancora migrato' })

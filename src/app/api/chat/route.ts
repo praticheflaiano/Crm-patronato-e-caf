@@ -1,5 +1,5 @@
 import { createOpenAI } from '@ai-sdk/openai'
-import { streamText } from 'ai'
+import { convertToModelMessages, streamText, type UIMessage } from 'ai'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 
@@ -52,7 +52,18 @@ export async function POST(req: Request) {
     return new Response('Richiesta non valida.', { status: 400 })
   }
 
-  const totalChars = JSON.stringify(messages).length
+  // Only allow 'user' and 'assistant' roles from the client. Any client-supplied
+  // 'system' (or other) role is ignored so the server-side system prompt below
+  // stays authoritative and cannot be overridden by the client.
+  const safeMessages = messages.filter(
+    (m) => m && (m.role === 'user' || m.role === 'assistant')
+  )
+
+  if (safeMessages.length === 0) {
+    return new Response('Richiesta non valida.', { status: 400 })
+  }
+
+  const totalChars = JSON.stringify(safeMessages).length
   if (totalChars > MAX_TOTAL_CHARS) {
     return new Response('Conversazione troppo lunga. Inizia una nuova chat.', { status: 413 })
   }
@@ -85,10 +96,10 @@ export async function POST(req: Request) {
       Il tuo compito è aiutare gli operatori a gestire pratiche, consultare documentazione e rispondere a domande normative.
       Se la richiesta riguarda TARI Roma/AMA, privilegia sempre le fonti ufficiali AMA Roma e Roma Capitale e segnala quando un dato va verificato sul portale ufficiale.
       Rispondi in italiano, in modo operativo e sintetico. Non fornire mai diagnosi mediche. Se non conosci una risposta, dillo chiaramente.`,
-      messages,
+      messages: await convertToModelMessages(safeMessages as UIMessage[]),
     })
 
-    return result.toTextStreamResponse()
+    return result.toUIMessageStreamResponse()
   } catch (chatError) {
     console.error('OpenRouter chat failed:', chatError instanceof Error ? chatError.message : 'unknown error')
 

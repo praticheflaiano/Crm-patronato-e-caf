@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { SetupNotice } from '@/components/setup-notice'
@@ -29,13 +30,25 @@ export default async function DoctorNewCertificatePage({ params }: PageProps) {
     redirect('/')
   }
 
-  // Verify doctor is assigned to this case
+  // Verify doctor is a collaborator on this case (source of truth)
+  const { data: membership } = await (supabase as any)
+    .from('case_collaborators')
+    .select('id')
+    .eq('case_id', caseId)
+    .eq('user_id', user.id)
+    .eq('role', 'doctor')
+    .maybeSingle()
+
+  if (!membership) {
+    notFound()
+  }
+
+  // Verify the case exists and is an invalidità civile case
   const { data: caseData } = await supabase
     .from('cases')
-    .select('id, title, doctor_id')
+    .select('id, title')
     .eq('id', caseId)
     .eq('type', 'invalidita_civile')
-    .eq('doctor_id', user.id)
     .single()
 
   if (!caseData) {

@@ -36,6 +36,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: 'Non autorizzato' }, { status: 403 })
     }
 
+    // Admin/operator: ensure the target case belongs to the same organization
+    // before attaching sensitive health data.
+    if (profile.role !== 'doctor') {
+      const { data: caseOrgRaw } = await supabaseClient
+        .from('cases')
+        .select('organization_id')
+        .eq('id', caseId)
+        .single()
+
+      const caseOrg = caseOrgRaw as { organization_id: string | null } | null
+      if (!caseOrg || caseOrg.organization_id !== profile.organization_id) {
+        return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
+      }
+    }
+
     // Get existing invalidity_details
     const { data: existingDetails } = await supabase
       .from('invalidity_details')
@@ -100,7 +115,7 @@ export async function PATCH(request: Request) {
 
     const { data: profileData } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, organization_id')
       .eq('id', user.id)
       .single()
 
@@ -108,23 +123,37 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ ok: false, message: 'Profilo non trovato' }, { status: 404 })
     }
 
-    const profile = profileData as { role: string }
+    const profile = profileData as { role: string; organization_id: string }
 
     if (!['admin', 'operator', 'doctor'].includes(profile.role)) {
       return NextResponse.json({ ok: false, message: 'Non autorizzato' }, { status: 403 })
     }
 
-    // If doctor, verify assignment
-    if (profile.role === 'doctor') {
-      const { data: caseDataRaw } = await supabase
+    // Admin/operator: ensure the target case belongs to the same organization.
+    if (profile.role !== 'doctor') {
+      const { data: caseOrgRaw } = await supabaseClient
         .from('cases')
-        .select('doctor_id')
+        .select('organization_id')
         .eq('id', caseId)
         .single()
 
-      const caseData = caseDataRaw as { doctor_id: string | null } | null
+      const caseOrg = caseOrgRaw as { organization_id: string | null } | null
+      if (!caseOrg || caseOrg.organization_id !== profile.organization_id) {
+        return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
+      }
+    }
 
-      if (caseData?.doctor_id !== user.id) {
+    // If doctor, verify they're a collaborator on this case (source of truth)
+    if (profile.role === 'doctor') {
+      const { data: membership } = await supabaseClient
+        .from('case_collaborators')
+        .select('id')
+        .eq('case_id', caseId)
+        .eq('user_id', user.id)
+        .eq('role', 'doctor')
+        .maybeSingle()
+
+      if (!membership) {
         return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
       }
     }

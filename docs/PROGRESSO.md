@@ -1,6 +1,93 @@
 # Progresso CRM Patronato e CAF
 
-Ultimo aggiornamento: 2026-05-30
+Ultimo aggiornamento: 2026-05-31
+
+## Completamento funzionale pre-pubblicazione (2026-05-31)
+
+Audit finale per rendere il CRM pienamente funzionante in ogni sua parte, prima
+della pubblicazione in produzione.
+
+### Assistente AI riparato (era completamente rotto)
+
+La pagina chat usava la vecchia API di `useChat` (`input`, `handleInputChange`,
+`handleSubmit`, `m.content`) mascherata con `as any`, ma il progetto monta
+**AI SDK v6** (`ai@6`, `@ai-sdk/react@3`), dove quell'API non esiste più: a
+runtime il campo di input era **non digitabile** e i messaggi si renderizzavano
+**vuoti** → assistente del tutto inutilizzabile.
+
+- Client (`src/app/chat/page.tsx`): riscritto sull'API v6 — `useChat()` con
+  `sendMessage`/`status`, input gestito in locale, testo letto da `message.parts`.
+- Server (`src/app/api/chat/route.ts`): i messaggi UI in arrivo ora passano per
+  `convertToModelMessages()` e la risposta usa `toUIMessageStreamResponse()`
+  (protocollo UI message stream), coerente col transport di default del client.
+  Mantenuti auth, rate limiting e validazione input già presenti.
+
+### Centro notifiche reso operativo
+
+Il sistema notifiche aveva lettura/segna-letto/eliminazione e realtime completi,
+ma **nessun punto dell'app creava notifiche** → la campanella restava sempre
+vuota. Aggiunto helper best-effort `src/lib/notifications.ts` (`notifyUser`,
+non blocca mai l'azione che lo scatena) e collegato agli eventi a destinatario
+univoco del flusso medico:
+
+- Invito di un medico a una pratica → notifica al medico.
+- Nuova richiesta su una pratica → notifica al medico assegnato (no auto-notifica).
+
+`organization_id` è impostato dal trigger esistente; la policy SELECT è per
+`user_id`, quindi il medico vede la notifica anche se di organizzazione diversa.
+
+### Verifiche
+
+`npm run lint` ✅ · `npm run build` ✅ (type-check incluso) · `npm test` ✅ 124/124.
+
+## Sprint sicurezza onboarding & multi-medico (2026-05-31)
+
+### Approvazione account da parte dell'admin
+
+In precedenza chiunque si registrava otteneva automaticamente un profilo
+`operator` con accesso completo all'organizzazione, e qualsiasi utente
+autenticato poteva modificare il proprio `role`/`organization_id` (escalation di
+privilegi). Ora:
+
+- Migrazioni `onboarding_*`:
+  - Nuova colonna `profiles.status` (`pending` / `active` / `disabled`); i membri
+    esistenti sono stati impostati su `active`.
+  - `profiles.organization_id` reso nullable: un account in attesa non ha
+    organizzazione, quindi tutte le policy `organization_id IN (...)` lo escludono
+    automaticamente (nessuna riscrittura delle policy operative).
+  - Trigger `on_auth_user_created` → `handle_new_user()`: ogni nuovo utente nasce
+    `pending`, senza organizzazione e con ruolo minimo.
+  - `REVOKE INSERT/UPDATE` sui campi sensibili di `profiles` (clienti possono
+    aggiornare solo `full_name`). L'unico modo per assegnare ruolo/org/stato è la
+    funzione `security definer` `approve_member()`, protetta da `is_active_admin()`.
+- App:
+  - `getOrCreateUserProfile` ora è in sola lettura ed espone `status`.
+  - Layout: schermata `PendingApproval` per account in attesa o sospesi.
+  - Nuova pagina admin `/admin/utenti` per approvare/rifiutare registrazioni e
+    gestire ruoli e sospensioni.
+
+### Più medici per pratica
+
+La dashboard medico filtrava per la singola colonna `cases.doctor_id`, che veniva
+sovrascritta a ogni invito: solo l'ultimo medico vedeva la pratica. Ora l'accesso
+dei medici si basa sulla tabella `case_collaborators` (`role='doctor'`), coerente
+con le policy RLS `is_case_collaborator`, così più medici possono collaborare sulla
+stessa pratica. Modifiche solo applicative (nessuna migrazione).
+
+### Correzioni post-review
+
+- **Ricorsione RLS su `profiles`**: la prima versione della policy admin conteneva
+  una subquery su `profiles` dentro una policy su `profiles` → errore 42P17 a ogni
+  lettura del profilo da parte di un admin (quindi a ogni pagina, via il layout).
+  Risolto con la funzione `security definer` `current_user_org_id()` (stesso schema
+  di `is_case_collaborator`). La policy mostra ora anche gli utenti senza org
+  (pending **e** disabled), così l'admin può riattivare gli account sospesi.
+- **Migrazioni versionate**: lo stato applicato è ora nel repo in
+  `supabase/migrations/0020_onboarding_member_status.sql` e
+  `0021_onboarding_profile_hardening.sql` (idempotenti, stato finale corretto).
+- Test unit `src/lib/__tests__/user-profile.test.ts` per `isActiveMember()`.
+
+Ultimo aggiornamento precedente: 2026-05-30
 
 ## Sprint qualità & funzionalità (2026-05-30)
 

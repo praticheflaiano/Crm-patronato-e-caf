@@ -55,17 +55,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: 'Non autorizzato a gestire certificati medici' }, { status: 403 })
     }
 
-    // If doctor, verify they're assigned to this case
+    // If doctor, verify they're a collaborator on this case (source of truth)
     if (profile.role === 'doctor') {
-      const { data: caseDataRaw } = await supabase
+      const { data: membership } = await (supabase as any)
+        .from('case_collaborators')
+        .select('id')
+        .eq('case_id', caseId)
+        .eq('user_id', user.id)
+        .eq('role', 'doctor')
+        .maybeSingle()
+
+      if (!membership) {
+        return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
+      }
+    } else {
+      // Admin/operator: ensure the target case belongs to the same organization
+      // before attaching sensitive health data.
+      const { data: caseOrgRaw } = await (supabase as any)
         .from('cases')
-        .select('doctor_id')
+        .select('organization_id')
         .eq('id', caseId)
         .single()
 
-      const caseData = caseDataRaw as { doctor_id: string | null } | null
-
-      if (caseData?.doctor_id !== user.id) {
+      const caseOrg = caseOrgRaw as { organization_id: string | null } | null
+      if (!caseOrg || caseOrg.organization_id !== profile.organization_id) {
         return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
       }
     }
@@ -177,7 +190,7 @@ export async function PATCH(request: Request) {
 
     const { data: profileData } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, organization_id')
       .eq('id', user.id)
       .single()
 
@@ -185,7 +198,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ ok: false, message: 'Profilo non trovato' }, { status: 404 })
     }
 
-    const profile = profileData as { role: string }
+    const profile = profileData as { role: string; organization_id: string }
 
     // Only admin, operator, or doctor can update medical certificates
     if (!['admin', 'operator', 'doctor'].includes(profile.role)) {
@@ -203,17 +216,29 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ ok: false, message: 'Certificato non trovato' }, { status: 404 })
     }
 
-    // If doctor, verify they're assigned to this case
+    // If doctor, verify they're a collaborator on this case (source of truth)
     if (profile.role === 'doctor') {
-      const { data: caseDataRaw } = await (supabase as any)
+      const { data: membership } = await (supabase as any)
+        .from('case_collaborators')
+        .select('id')
+        .eq('case_id', existingCert.case_id)
+        .eq('user_id', user.id)
+        .eq('role', 'doctor')
+        .maybeSingle()
+
+      if (!membership) {
+        return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
+      }
+    } else {
+      // Admin/operator: ensure the certificate's case belongs to the same organization.
+      const { data: caseOrgRaw } = await (supabase as any)
         .from('cases')
-        .select('doctor_id')
+        .select('organization_id')
         .eq('id', existingCert.case_id)
         .single()
 
-      const caseData = caseDataRaw as { doctor_id: string | null } | null
-
-      if (caseData?.doctor_id !== user.id) {
+      const caseOrg = caseOrgRaw as { organization_id: string | null } | null
+      if (!caseOrg || caseOrg.organization_id !== profile.organization_id) {
         return NextResponse.json({ ok: false, message: 'Non autorizzato per questa pratica' }, { status: 403 })
       }
     }

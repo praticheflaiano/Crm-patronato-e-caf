@@ -47,13 +47,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Il titolo della scadenza è richiesto' }, { status: 400 })
   }
 
+  // Always derive the organization server-side; never trust a client-supplied value.
+  if (!profile?.organization_id) {
+    return NextResponse.json({ error: 'Organizzazione non disponibile' }, { status: 400 })
+  }
+
   const payload = {
     title: String(taskData.title).trim(),
     description: taskData.description ? String(taskData.description).trim() : null,
     due_date: taskData.due_date || null,
     case_id: taskData.case_id || null,
     assigned_to: taskData.assigned_to || user.id,
-    organization_id: taskData.organization_id || profile?.organization_id,
+    organization_id: profile.organization_id,
     is_completed: Boolean(taskData.is_completed),
   }
 

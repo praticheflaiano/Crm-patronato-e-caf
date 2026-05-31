@@ -18,8 +18,13 @@ export function isMissingSchemaResourceError(error: unknown) {
   )
 }
 
-export function getSafeErrorMessage(error: unknown, fallback = 'Errore interno') {
-  const err = error as SupabaseLikeError | Error | null
-  if (!err) return fallback
-  return 'message' in err && err.message ? err.message : fallback
+export function getSafeErrorMessage(error: unknown, fallback = 'Si è verificato un errore. Riprova.') {
+  // Log the real error server-side for diagnostics, but never leak DB internals
+  // (table/column/constraint names) to the client.
+  if (error) {
+    const err = error as SupabaseLikeError | Error
+    const detail = 'message' in err && err.message ? err.message : String(error)
+    console.error('Supabase error:', detail)
+  }
+  return fallback
 }
