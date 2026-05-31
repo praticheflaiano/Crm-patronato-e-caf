@@ -2,6 +2,29 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Hotfix produzione: permission denied is_case_collaborator (2026-05-31)
+
+Subito dopo la pubblicazione, la produzione mostrava
+`Errore nel caricamento dei contatti: permission denied for function
+is_case_collaborator` (e un errore di autenticazione collegato).
+
+**Causa**: la migrazione `0018` aveva revocato `EXECUTE` sugli helper RLS
+`is_case_collaborator` / `is_org_member_of_case` anche da `authenticated`,
+pensando di nasconderli solo dal endpoint RPC PostgREST. Ma sono funzioni
+`SECURITY DEFINER` chiamate **dentro** le policy RLS di contacts, cases,
+documents, case_messages, case_requests, case_collaborators, invalidity_details
+e medical_certificates; le policy vengono valutate come ruolo `authenticated`,
+che quindi deve poterle eseguire. Senza il grant, ogni lettura falliva.
+
+**Fix** (`0022_fix_rls_helper_execute_grants.sql`, applicata al remoto e
+versionata): `grant execute ... to authenticated` su entrambi gli helper,
+mantenendo il revoke da `anon`/`public`. Gli helper riportano solo l'accesso
+del chiamante (filtrano per `auth.uid()`), quindi nessuna esposizione dati.
+`get_doctor_assigned_cases` resta bloccata (non usata da policy né dall'app).
+
+Verificato in produzione impersonando l'admin con ruolo `authenticated`: la
+lettura di `contacts` ora restituisce le righe invece di "permission denied".
+
 ## Completamento funzionale pre-pubblicazione (2026-05-31)
 
 Audit finale per rendere il CRM pienamente funzionante in ogni sua parte, prima
