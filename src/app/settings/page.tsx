@@ -5,6 +5,7 @@ import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 import { getOrCreateUserProfile, formatRole } from '@/lib/user-profile'
 import { ProfileForm } from './profile-form'
+import { OpenRouterKeyForm } from './openrouter-form'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ProfileRecord = Record<string, any>
@@ -17,11 +18,6 @@ function getSystemChecks() {
       label: 'Chiave service role (inviti medico)',
       ok: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
       hint: "Necessaria per invitare un medico via email dalla scheda invalidità. Impostala su Vercel come SUPABASE_SERVICE_ROLE_KEY (solo Production, mai NEXT_PUBLIC).",
-    },
-    {
-      label: 'Assistente AI (OpenRouter)',
-      ok: Boolean(process.env.OPENROUTER_API_KEY),
-      hint: 'Necessaria per la chat AI. Variabile OPENROUTER_API_KEY.',
     },
   ]
 }
@@ -46,12 +42,28 @@ export default async function SettingsPage() {
 
   let members: ProfileRecord[] = []
   const systemChecks = profile.role === 'admin' ? getSystemChecks() : []
+  let openRouterConfigured = false
+  let openRouterSource: 'db' | 'env' | 'none' = 'none'
   if (profile.role === 'admin') {
     const { data } = await supabase
       .from('profiles')
       .select('id, full_name, role')
       .eq('organization_id', profile.organization_id)
     members = Array.isArray(data) ? (data as ProfileRecord[]) : []
+
+    // Determine the OpenRouter key status without exposing the value to the client.
+    let hasDbKey = false
+    if (profile.organization_id) {
+      const { data: settings } = await supabase
+        .from('app_settings')
+        .select('openrouter_api_key')
+        .eq('organization_id', profile.organization_id)
+        .maybeSingle()
+      hasDbKey = Boolean((settings as ProfileRecord | null)?.openrouter_api_key)
+    }
+    const hasEnvKey = Boolean(process.env.OPENROUTER_API_KEY)
+    openRouterConfigured = hasDbKey || hasEnvKey
+    openRouterSource = hasDbKey ? 'db' : hasEnvKey ? 'env' : 'none'
   }
 
   return (
@@ -126,6 +138,15 @@ export default async function SettingsPage() {
               </li>
             ))}
           </ul>
+
+          <div className="mt-6 border-t border-slate-100 pt-5">
+            <h3 className="text-sm font-semibold text-slate-900">Assistente AI (OpenRouter)</h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Incolla qui la chiave API OpenRouter per attivare la chat AI. La chiave dell&apos;app ha
+              priorità sull&apos;eventuale variabile d&apos;ambiente.
+            </p>
+            <OpenRouterKeyForm configured={openRouterConfigured} source={openRouterSource} />
+          </div>
         </section>
       )}
 

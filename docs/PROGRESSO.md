@@ -2,6 +2,25 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Chiave OpenRouter configurabile dall'app (2026-05-31)
+
+Richiesta: poter inserire la chiave OpenRouter dall'interfaccia admin invece che
+solo come variabile d'ambiente.
+
+- Nuova tabella `app_settings` (una riga per organizzazione) con
+  `openrouter_api_key`, RLS **solo-admin** dell'organizzazione
+  (`0025_app_settings_openrouter.sql`, applicata al remoto e versionata).
+- Pagina **Impostazioni → Assistente AI (OpenRouter)** (solo admin): form per
+  salvare/rimuovere la chiave (`updateOpenRouterKey` server action). La chiave è
+  scritta lato server e **non viene mai restituita al client** (il campo mostra
+  solo lo stato: salvata nell'app / da variabile d'ambiente / non configurata).
+- La rotta chat risolve la chiave lato server con priorità: chiave dell'app
+  (letta via service-role così funziona per tutti i membri, non solo admin) →
+  variabile d'ambiente `OPENROUTER_API_KEY`. Gli operatori non possono leggere
+  la chiave (RLS solo-admin), ma possono usare l'assistente.
+- Verificato in produzione: upsert admin tramite policy OK; build/lint/type-check
+  verdi.
+
 ## Hotfix produzione: salvataggio profilo bloccato (2026-05-31)
 
 In Impostazioni non era possibile salvare nemmeno il nome profilo
