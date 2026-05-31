@@ -7,7 +7,10 @@ import { getOrCreateUserProfile } from '@/lib/user-profile'
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
 
-const openRouterModel = process.env.OPENROUTER_MODEL?.trim() || 'minimax/minimax-m2.7'
+// Default model when neither the in-app setting nor the env var specify one.
+// A free OpenRouter model so the assistant works out of the box at no cost.
+const DEFAULT_OPENROUTER_MODEL = 'deepseek/deepseek-chat-v3-0324:free'
+const openRouterModelFallback = process.env.OPENROUTER_MODEL?.trim() || DEFAULT_OPENROUTER_MODEL
 const openRouterSiteUrl = process.env.OPENROUTER_SITE_URL?.trim() || 'https://crm-patronato-e-caf.vercel.app'
 const openRouterAppName = process.env.OPENROUTER_APP_NAME?.trim() || 'Centro Pratiche Flaiano CRM'
 
@@ -29,40 +32,50 @@ function isRateLimited(userId: string): boolean {
   return recent.length > RATE_LIMIT_MAX
 }
 
+type OpenRouterConfig = { key: string | null; model: string }
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function readKeyFromSettings(client: any, organizationId: string): Promise<string | null> {
+async function readSettings(client: any, organizationId: string): Promise<{ key: string | null; model: string | null }> {
   try {
     const { data } = await client
       .from('app_settings')
-      .select('openrouter_api_key')
+      .select('openrouter_api_key, openrouter_model')
       .eq('organization_id', organizationId)
       .maybeSingle()
     const key = data?.openrouter_api_key
-    return key ? String(key).trim() || null : null
+    const model = data?.openrouter_model
+    return {
+      key: key ? String(key).trim() || null : null,
+      model: model ? String(model).trim() || null : null,
+    }
   } catch {
-    return null
+    return { key: null, model: null }
   }
 }
 
-// Resolve the OpenRouter key: the in-app, admin-configured key (per organization)
-// takes precedence over the OPENROUTER_API_KEY env var. It is read server-side
-// only, so it is never exposed to the browser. The service-role client is used
-// when available so the assistant works for every member; admins can also read
-// their own org row directly. Falls back to the env var for env-based setups.
+// Resolve the OpenRouter key + model: the in-app, admin-configured values (per
+// organization) take precedence over the env vars. Read server-side only, so the
+// key is never exposed to the browser. The service-role client is used when
+// available so the assistant works for every member; admins can also read their
+// own org row directly. Falls back to the env var / free default model.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function resolveOpenRouterKey(userClient: any, organizationId: string | null): Promise<string | null> {
+async function resolveOpenRouterConfig(userClient: any, organizationId: string | null): Promise<OpenRouterConfig> {
+  let settings: { key: string | null; model: string | null } = { key: null, model: null }
   if (organizationId) {
     try {
       const admin = createAdminClient()
-      const key = await readKeyFromSettings(admin, organizationId)
-      if (key) return key
+      settings = await readSettings(admin, organizationId)
     } catch {
       // Service role not configured; fall through to the caller's own client.
     }
-    const key = await readKeyFromSettings(userClient, organizationId)
-    if (key) return key
+    if (!settings.key && !settings.model) {
+      settings = await readSettings(userClient, organizationId)
+    }
   }
-  return process.env.OPENROUTER_API_KEY?.trim() || null
+  return {
+    key: settings.key ?? (process.env.OPENROUTER_API_KEY?.trim() || null),
+    model: settings.model ?? openRouterModelFallback,
+  }
 }
 
 export async function POST(req: Request) {
@@ -106,7 +119,10 @@ export async function POST(req: Request) {
   }
 
   const profile = await getOrCreateUserProfile(user)
-  const openRouterApiKey = await resolveOpenRouterKey(supabase, profile?.organization_id ?? null)
+  const { key: openRouterApiKey, model: openRouterModel } = await resolveOpenRouterConfig(
+    supabase,
+    profile?.organization_id ?? null
+  )
 
   if (!openRouterApiKey) {
     return new Response('Assistente AI non configurato: aggiungi la chiave OpenRouter nelle Impostazioni.', { status: 503 })

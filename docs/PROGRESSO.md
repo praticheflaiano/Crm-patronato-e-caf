@@ -2,6 +2,20 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Selezione modello OpenRouter dall'app (2026-05-31)
+
+Esteso il pannello Impostazioni → Assistente AI: oltre alla chiave, l'admin può
+scegliere il **modello** OpenRouter.
+
+- `0026_app_settings_openrouter_model.sql`: colonna `openrouter_model` su
+  `app_settings` (NULL = usa il default del server).
+- Form: campo modello con datalist di **modelli gratuiti** suggeriti (id che
+  finisce in `:free`) e link a openrouter.ai/models?max_price=0; accetta
+  qualsiasi id incollato. Checkbox per rimuovere la chiave; lasciare la chiave
+  vuota ora **non** la cancella più (si può cambiare solo il modello).
+- Rotta chat: risolve il modello con priorità modello-app → `OPENROUTER_MODEL`
+  → default gratuito `deepseek/deepseek-chat-v3-0324:free`.
+
 ## Chiave OpenRouter configurabile dall'app (2026-05-31)
 
 Richiesta: poter inserire la chiave OpenRouter dall'interfaccia admin invece che
