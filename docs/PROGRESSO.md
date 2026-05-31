@@ -2,6 +2,27 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Hotfix produzione: salvataggio profilo bloccato (2026-05-31)
+
+In Impostazioni non era possibile salvare nemmeno il nome profilo
+("Salvataggio non riuscito").
+
+**Causa**: la migrazione `0021` ha irrobustito `profiles` (REVOKE INSERT/UPDATE a
+livello tabella, lasciando solo il grant di colonna su `full_name`) ma **non ha
+lasciato alcuna policy UPDATE**. Con RLS attiva e nessuna policy UPDATE, ogni
+modifica viene negata.
+
+**Fix** (`0023_profiles_self_update_policy.sql`, applicata al remoto e
+versionata): policy di self-update (`id = auth.uid()` in USING e WITH CHECK).
+L'escalation resta impossibile perché il grant di colonna consente di scrivere
+solo `full_name`; ruolo/organizzazione/stato si cambiano solo via
+`approve_member()`. Verificato con update impersonato in produzione.
+
+Nota: il pannello "Stato configurazione" (OpenRouter, service role) è di sola
+diagnostica — riporta solo se la chiave è presente. La chiave OpenRouter è la
+variabile d'ambiente `OPENROUTER_API_KEY` (impostata su Vercel), non
+configurabile dall'interfaccia.
+
 ## Hotfix produzione: permission denied is_case_collaborator (2026-05-31)
 
 Subito dopo la pubblicazione, la produzione mostrava
