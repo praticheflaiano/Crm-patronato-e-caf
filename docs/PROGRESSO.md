@@ -2,6 +2,24 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Memoria chat su database (2026-05-31)
+
+Completata la fase finale: la cronologia della chat è salvata sul database (per
+utente, RLS), quindi **segue l'utente su qualsiasi dispositivo** invece di
+restare nel browser.
+
+- Nuova rotta `/api/chat/history`: GET (carica l'ultima conversazione + messaggi,
+  crea-on-demand lato client), POST `{action:'new'}` (nuova conversazione),
+  DELETE (cancella tutta la cronologia dell'utente).
+- `/api/chat`: accetta `conversationId`, salva il messaggio utente prima dello
+  stream e la risposta dell'assistente in `onFinish` (best-effort, non blocca
+  mai la chat); restituisce l'id conversazione nell'header `x-conversation-id`.
+- Pagina `/chat`: carica la cronologia dal DB all'avvio (sostituisce
+  localStorage come fonte primaria), invia `conversationId` con ogni messaggio,
+  "Nuova chat" azzera e apre una nuova conversazione.
+- Verificato end-to-end sul remoto sotto RLS (conversazione + messaggi creati e
+  riletti, rolled back). lint/build/type-check/test verdi (124).
+
 ## Knowledge base + RAG + memoria chat su DB — Fase 1/2/3 (2026-05-31)
 
 Implementato il motore RAG e la sezione Conoscenza richiesti.

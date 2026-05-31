@@ -98,6 +98,7 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => null)
   const messages = body?.messages
+  const requestedConversationId = typeof body?.conversationId === 'string' ? body.conversationId : null
 
   if (!Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES) {
     return new Response('Richiesta non valida.', { status: 400 })
@@ -129,6 +130,30 @@ export async function POST(req: Request) {
     return new Response('Assistente AI non configurato: aggiungi la chiave OpenRouter nelle Impostazioni.', { status: 503 })
   }
 
+  // Ensure there is a conversation to attach this exchange to (DB-backed memory).
+  // Validate ownership of any client-supplied id; otherwise create a new one.
+  let conversationId: string | null = null
+  try {
+    if (requestedConversationId) {
+      const { data: existing } = await supabase
+        .from('chat_conversations')
+        .select('id')
+        .eq('id', requestedConversationId)
+        .maybeSingle()
+      conversationId = (existing as { id?: string } | null)?.id ?? null
+    }
+    if (!conversationId) {
+      const { data: created } = await supabase
+        .from('chat_conversations')
+        .insert({ user_id: user.id, organization_id: profile?.organization_id ?? null } as never)
+        .select('id')
+        .single()
+      conversationId = (created as { id?: string } | null)?.id ?? null
+    }
+  } catch {
+    conversationId = null // memory is best-effort; never block the chat
+  }
+
   // Ground the assistant in the user's real cases. Read with the authenticated
   // client so RLS applies: the assistant only ever sees what this user can see.
   const caseContext = await buildCaseContext(supabase)
@@ -143,6 +168,20 @@ export async function POST(req: Request) {
         .join(' ')
     : String(lastUserMessage?.content ?? '')
   const knowledgeContext = await buildKnowledgeContext(supabase, lastUserText)
+
+  // Persist the incoming user message (best-effort; failures never block chat).
+  if (conversationId && lastUserText.trim()) {
+    try {
+      await supabase.from('chat_messages').insert({
+        conversation_id: conversationId,
+        user_id: user.id,
+        role: 'user',
+        content: lastUserText.slice(0, 8000),
+      } as never)
+    } catch {
+      // ignore
+    }
+  }
 
   const openrouter = createOpenAI({
     apiKey: openRouterApiKey,
@@ -164,9 +203,31 @@ export async function POST(req: Request) {
 
 ${caseContext}${knowledgeContext ? `\n\n${knowledgeContext}` : ''}`,
       messages: await convertToModelMessages(safeMessages as UIMessage[]),
+      // Persist the assistant's full reply once streaming completes so the
+      // conversation is restored on any device. Best-effort.
+      onFinish: async ({ text }) => {
+        if (!conversationId || !text?.trim()) return
+        try {
+          await supabase.from('chat_messages').insert({
+            conversation_id: conversationId,
+            user_id: user.id,
+            role: 'assistant',
+            content: text.slice(0, 16000),
+          } as never)
+          await supabase
+            .from('chat_conversations')
+            .update({ updated_at: new Date().toISOString() } as never)
+            .eq('id', conversationId)
+        } catch {
+          // ignore
+        }
+      },
     })
 
-    return result.toUIMessageStreamResponse()
+    // Surface the conversation id so the client can keep sending to it.
+    return result.toUIMessageStreamResponse({
+      headers: conversationId ? { 'x-conversation-id': conversationId } : undefined,
+    })
   } catch (chatError) {
     console.error('OpenRouter chat failed:', chatError instanceof Error ? chatError.message : 'unknown error')
 

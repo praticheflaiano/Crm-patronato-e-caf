@@ -7,11 +7,6 @@ import { useEffect, useRef, useState } from 'react'
 type ChatPart = { type: string; text?: string }
 type ChatMessage = { id: string; role: string; parts?: ChatPart[] }
 
-// Conversation history is persisted in localStorage so it survives navigating
-// away from the page or reloading. It is per-browser only (no server storage),
-// which keeps potentially sensitive case context off the backend.
-const STORAGE_KEY = 'caf-assistant-chat-v1'
-
 // AI SDK v6 messages carry their text in a `parts` array rather than a single
 // `content` string; concatenate the text parts for display.
 function messageText(message: ChatMessage): string {
@@ -22,44 +17,57 @@ function messageText(message: ChatMessage): string {
     .join('')
 }
 
-function loadStoredMessages(): ChatMessage[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? (parsed as ChatMessage[]) : []
-  } catch {
-    return []
-  }
+type StoredMessage = { id: string; role: string; content: string }
+
+function toUiMessage(m: StoredMessage): ChatMessage {
+  return { id: m.id, role: m.role, parts: [{ type: 'text', text: m.content }] }
 }
 
 export default function ChatPage() {
-  // Read the saved history once, before the chat hook initializes, so it seeds
-  // the initial messages. useState initializer runs only on the first render.
-  const [initialMessages] = useState<ChatMessage[]>(() => loadStoredMessages())
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { messages, sendMessage, status, error, setMessages } = useChat({ messages: initialMessages as any })
+  // Conversation history lives in the database (per user), so it is restored on
+  // any device. We keep the conversation id and pass it with each message so the
+  // server appends to the same thread.
+  const conversationIdRef = useRef<string | null>(null)
+  const { messages, sendMessage, status, error, setMessages } = useChat()
   const [input, setInput] = useState('')
+  const [loadingHistory, setLoadingHistory] = useState(true)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const isLoading = status === 'submitted' || status === 'streaming'
   const errorMessage = error?.message || null
 
-  // Persist the conversation whenever it settles (not mid-stream), so reloads
-  // and navigation restore the full exchange.
+  // Load the saved conversation on mount. If none exists yet, create one so the
+  // very first message already has a stable thread to attach to.
   useEffect(() => {
-    if (isLoading) return
-    try {
-      if (messages.length === 0) {
-        window.localStorage.removeItem(STORAGE_KEY)
-      } else {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+    let active = true
+    ;(async () => {
+      try {
+        const res = await fetch('/api/chat/history', { cache: 'no-store' })
+        const data = await res.json()
+        if (!active) return
+        if (Array.isArray(data?.messages) && data.messages.length > 0) {
+          setMessages(data.messages.map(toUiMessage) as never)
+        }
+        if (data?.conversationId) {
+          conversationIdRef.current = data.conversationId
+        } else {
+          const created = await fetch('/api/chat/history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'new' }),
+          }).then((r) => r.json()).catch(() => null)
+          if (active && created?.conversationId) conversationIdRef.current = created.conversationId
+        }
+      } catch {
+        // Offline / not configured: chat still works, just without persistence.
+      } finally {
+        if (active) setLoadingHistory(false)
       }
-    } catch {
-      // Storage may be unavailable (private mode / quota); degrade gracefully.
+    })()
+    return () => {
+      active = false
     }
-  }, [messages, isLoading])
+  }, [setMessages])
 
   // Keep the latest message in view.
   useEffect(() => {
@@ -70,14 +78,21 @@ export default function ChatPage() {
     event.preventDefault()
     const text = input.trim()
     if (!text || isLoading) return
-    sendMessage({ text })
+    sendMessage({ text }, { body: { conversationId: conversationIdRef.current } })
     setInput('')
   }
 
-  function handleClear() {
+  async function handleClear() {
     setMessages([])
+    conversationIdRef.current = null
     try {
-      window.localStorage.removeItem(STORAGE_KEY)
+      await fetch('/api/chat/history', { method: 'DELETE' })
+      const created = await fetch('/api/chat/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'new' }),
+      }).then((r) => r.json()).catch(() => null)
+      if (created?.conversationId) conversationIdRef.current = created.conversationId
     } catch {
       // ignore
     }
@@ -110,7 +125,9 @@ export default function ChatPage() {
           <div className="flex h-full items-center justify-center px-4 text-slate-500">
             <div className="text-center">
               <Bot size={48} className="mx-auto mb-4 text-slate-300" aria-hidden="true" />
-              <p className="text-sm">Fai una domanda all&apos;assistente sulle normative o sulle pratiche in corso.</p>
+              <p className="text-sm">
+                {loadingHistory ? 'Caricamento conversazione…' : 'Fai una domanda all’assistente sulle normative o sulle pratiche in corso.'}
+              </p>
             </div>
           </div>
         ) : messages.map((m) => (
@@ -119,7 +136,7 @@ export default function ChatPage() {
               <div className="mb-1 flex items-center gap-2 text-sm font-semibold">
                 {m.role === 'user' ? <><UserIcon size={14} aria-hidden="true" /><span>Tu</span></> : <><Bot size={14} aria-hidden="true" /><span>Assistente AI</span></>}
               </div>
-              <div className="whitespace-pre-wrap break-words text-sm">{messageText(m)}</div>
+              <div className="whitespace-pre-wrap break-words text-sm">{messageText(m as ChatMessage)}</div>
             </div>
           </div>
         ))}
