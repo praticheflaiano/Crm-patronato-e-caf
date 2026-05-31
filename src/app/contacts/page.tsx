@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Download, Mail, Phone, Plus, Search, Users } from 'lucide-react'
+import { Download, Mail, Phone, Plus, Search, Upload, Users } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
@@ -38,6 +38,10 @@ export default async function ContactsPage({ searchParams }: { searchParams?: Pr
           <p className="mt-1 text-sm text-slate-500">Anagrafica clienti, recapiti e pratiche collegate.</p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Link href="/contacts/import" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+            <Upload size={16} aria-hidden="true" />
+            Importa CSV
+          </Link>
           <Link href="/contacts/export" download className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
             <Download size={16} aria-hidden="true" />
             Esporta CSV
