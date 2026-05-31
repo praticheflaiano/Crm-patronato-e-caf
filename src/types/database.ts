@@ -112,7 +112,6 @@ export interface Database {
           assigned_to: string | null
           organization_id: string
           doctor_id: string | null
-          invalidity_details_id: string | null
         }
         Insert: {
           id?: string
@@ -126,7 +125,6 @@ export interface Database {
           assigned_to?: string | null
           organization_id?: string
           doctor_id?: string | null
-          invalidity_details_id?: string | null
         }
         Update: {
           id?: string
@@ -140,7 +138,6 @@ export interface Database {
           assigned_to?: string | null
           organization_id?: string
           doctor_id?: string | null
-          invalidity_details_id?: string | null
         }
       }
       documents: {
