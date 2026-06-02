@@ -2,6 +2,23 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Hotfix: Edge Function embed WORKER_RESOURCE_LIMIT (2026-05-31)
+
+In produzione la sezione Conoscenza mostrava "Embedding non riuscito: Edge
+Function returned a non-2xx status code". Riprodotto chiamando direttamente la
+funzione: con un batch di 20 testi restituiva HTTP 546 `WORKER_RESOURCE_LIMIT`
+(il modello gte-small è pesante in memoria sul runtime edge). Batch piccoli
+(3-6) → HTTP 200 in <1s.
+
+**Fix**:
+- App: `EMBED_BATCH` ridotto da 20 a 4 in `/api/knowledge` (l'indicizzazione
+  invia più batch piccoli con margine ampio).
+- Edge Function `embed` v2: cap difensivo a max 8 input per chiamata (oltre →
+  400 pulito invece di crash). Sorgente ora versionata in
+  `supabase/functions/embed/index.ts`.
+- Verificato end-to-end: 5 batch consecutivi da 4 → tutti HTTP 200 (~0.6-1s);
+  batch da 12 → 400. lint/build/test verdi (124).
+
 ## Memoria chat su database (2026-05-31)
 
 Completata la fase finale: la cronologia della chat è salvata sul database (per

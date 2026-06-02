@@ -9,7 +9,10 @@ import { embedTexts } from '@/lib/embeddings'
 export const maxDuration = 60
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024 // 10 MB
-const EMBED_BATCH = 20
+// gte-small runs inside the embed Edge Function, which has a tight memory
+// budget; embedding too many texts per call trips WORKER_RESOURCE_LIMIT. Small
+// batches stay well within limits (≈0.9s for 6 texts), so use 4 for headroom.
+const EMBED_BATCH = 4
 
 // List the organization's knowledge documents.
 export async function GET() {
