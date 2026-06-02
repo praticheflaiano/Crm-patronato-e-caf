@@ -1,7 +1,8 @@
 // Text extraction + chunking for the knowledge base (RAG).
 //
-// Runs server-side only (used by API routes). PDF parsing uses pdf-parse v2,
-// Word (.docx) uses mammoth; plain text and pasted snippets pass through.
+// Runs server-side only (used by API routes). PDF parsing uses unpdf (a
+// serverless-safe pdf.js build), Word (.docx) uses mammoth; plain text and
+// pasted snippets pass through.
 
 export const EMBEDDING_DIMENSIONS = 384
 
@@ -37,11 +38,12 @@ export async function extractText(buffer: Buffer, kind: ExtractableKind): Promis
     const result = await mammoth.extractRawText({ buffer })
     return result.value ?? ''
   }
-  // pdf
-  const { PDFParse } = await import('pdf-parse')
-  const parser = new PDFParse({ data: new Uint8Array(buffer) })
-  const result = await parser.getText()
-  return result.text ?? ''
+  // pdf — use unpdf, a serverless-safe pdf.js build. pdf-parse pulls in the
+  // browser pdf.js which needs DOM APIs (DOMMatrix) absent on Vercel's runtime.
+  const { extractText: extractPdfText, getDocumentProxy } = await import('unpdf')
+  const doc = await getDocumentProxy(new Uint8Array(buffer))
+  const { text } = await extractPdfText(doc, { mergePages: true })
+  return Array.isArray(text) ? text.join('\n') : (text ?? '')
 }
 
 // Normalize whitespace and split into overlapping chunks on paragraph/sentence

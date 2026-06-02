@@ -2,6 +2,41 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Hotfix: Edge Function embed WORKER_RESOURCE_LIMIT (2026-05-31)
+
+In produzione la sezione Conoscenza mostrava "Embedding non riuscito: Edge
+Function returned a non-2xx status code". Riprodotto chiamando direttamente la
+funzione: con un batch di 20 testi restituiva HTTP 546 `WORKER_RESOURCE_LIMIT`
+(il modello gte-small è pesante in memoria sul runtime edge). Batch piccoli
+(3-6) → HTTP 200 in <1s.
+
+**Fix**:
+- App: `EMBED_BATCH` ridotto da 20 a 4 in `/api/knowledge` (l'indicizzazione
+  invia più batch piccoli con margine ampio).
+- Edge Function `embed` v2: cap difensivo a max 8 input per chiamata (oltre →
+  400 pulito invece di crash). Sorgente ora versionata in
+  `supabase/functions/embed/index.ts`.
+- Verificato end-to-end: 5 batch consecutivi da 4 → tutti HTTP 200 (~0.6-1s);
+  batch da 12 → 400. lint/build/test verdi (124).
+
+## Memoria chat su database (2026-05-31)
+
+Completata la fase finale: la cronologia della chat è salvata sul database (per
+utente, RLS), quindi **segue l'utente su qualsiasi dispositivo** invece di
+restare nel browser.
+
+- Nuova rotta `/api/chat/history`: GET (carica l'ultima conversazione + messaggi,
+  crea-on-demand lato client), POST `{action:'new'}` (nuova conversazione),
+  DELETE (cancella tutta la cronologia dell'utente).
+- `/api/chat`: accetta `conversationId`, salva il messaggio utente prima dello
+  stream e la risposta dell'assistente in `onFinish` (best-effort, non blocca
+  mai la chat); restituisce l'id conversazione nell'header `x-conversation-id`.
+- Pagina `/chat`: carica la cronologia dal DB all'avvio (sostituisce
+  localStorage come fonte primaria), invia `conversationId` con ogni messaggio,
+  "Nuova chat" azzera e apre una nuova conversazione.
+- Verificato end-to-end sul remoto sotto RLS (conversazione + messaggi creati e
+  riletti, rolled back). lint/build/type-check/test verdi (124).
+
 ## Knowledge base + RAG + memoria chat su DB — Fase 1/2/3 (2026-05-31)
 
 Implementato il motore RAG e la sezione Conoscenza richiesti.
