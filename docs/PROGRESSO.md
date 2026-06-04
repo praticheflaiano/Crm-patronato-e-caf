@@ -1,6 +1,15 @@
 # Progresso CRM Patronato e CAF
 
-Ultimo aggiornamento: 2026-05-31
+Ultimo aggiornamento: 2026-06-04
+
+## Import CSV Pratiche completato (2026-06-04)
+
+Implementata l'ultima funzionalità trasversale rimasta in sospeso prima dell'audit finale: importazione in blocco delle pratiche da CSV.
+
+- Nuova pagina `/cases/import` con form e istruzioni.
+- Azione server `importCases` (`src/app/cases/import/actions.ts`) che legge il CSV, mappa i campi alle pratiche e associa al cliente corretto tramite codice fiscale con controllo dei duplicati e gestione degli errori.
+- Collegamento inserito in `/cases` di fianco all'esportazione.
+- Mantenuto l'approccio tollerante con intestazioni sia in inglese che in italiano e tipi/stati gestiti in modo morbido (es. "In lavorazione" -> `in_progress`).
 
 ## Hotfix: Edge Function embed WORKER_RESOURCE_LIMIT (2026-05-31)
 
@@ -429,9 +438,7 @@ Ultimo aggiornamento precedente: 2026-05-26
 
 Integrare i risultati dei worker in questo ordine:
 
-1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
-2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+1. Checklist sicurezza avanzata (Audit RLS, configurazioni).
 
 ## Comandi di verifica
 
