@@ -224,6 +224,14 @@ univoco del flusso medico:
 
 `npm run lint` ✅ · `npm run build` ✅ (type-check incluso) · `npm test` ✅ 124/124.
 
+## Import CSV (2026-06-06)
+
+Implementato il sistema per importare pratiche in blocco tramite CSV, completando la suite di import/export per agevolare il caricamento rapido dell'archivio pre-esistente.
+
+- Nuova rotta `/cases/import`: UI di importazione per le Pratiche, analoga a quella dei Contatti.
+- Integrazione UI: aggiunti pulsanti "Importa CSV" nelle pagine principali (Contatti e Pratiche).
+- Server Actions: parsing robusto (sia comma che semicolon) con `parseCsv`, skip dei duplicati e lookup automatico dell'ID contatto partendo dal Codice Fiscale.
+
 ## Sprint sicurezza onboarding & multi-medico (2026-05-31)
 
 ### Approvazione account da parte dell'admin
@@ -416,7 +424,7 @@ Ultimo aggiornamento precedente: 2026-05-26
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
 8. Knowledge base. Da fare.
 9. Assistente AI OpenRouter implementato; RAG protetto da fare.
-10. Import CSV e checklist sicurezza avanzata. Da fare.
+10. Import CSV completato; Checklist sicurezza avanzata. Da fare.
 11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
 
 ## Team agenti attivo
@@ -431,7 +439,7 @@ Integrare i risultati dei worker in questo ordine:
 
 1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
 2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+3. Completare checklist sicurezza avanzata.
 
 ## Comandi di verifica
 

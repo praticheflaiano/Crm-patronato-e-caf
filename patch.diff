@@ -1,0 +1,26 @@
+<<<<<<< SEARCH
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Link href="/cases/export" download className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+            <Download size={16} aria-hidden="true" />
+            Esporta CSV
+          </Link>
+          <Link href="/cases/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+            <Plus size={16} aria-hidden="true" />
+            Nuova Pratica
+          </Link>
+        </div>
+=======
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Link href="/cases/import" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+            Importa CSV
+          </Link>
+          <Link href="/cases/export" download className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+            <Download size={16} aria-hidden="true" />
+            Esporta CSV
+          </Link>
+          <Link href="/cases/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+            <Plus size={16} aria-hidden="true" />
+            Nuova Pratica
+          </Link>
+        </div>
+>>>>>>> REPLACE
