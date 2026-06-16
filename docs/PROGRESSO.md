@@ -416,7 +416,7 @@ Ultimo aggiornamento precedente: 2026-05-26
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
 8. Knowledge base. Da fare.
 9. Assistente AI OpenRouter implementato; RAG protetto da fare.
-10. Import CSV e checklist sicurezza avanzata. Da fare.
+10. Import CSV e checklist sicurezza avanzata. Completato.
 11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
 
 ## Team agenti attivo
@@ -431,7 +431,7 @@ Integrare i risultati dei worker in questo ordine:
 
 1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
 2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+3. Aggiungere import CSV e checklist sicurezza avanzata. Completato.
 
 ## Comandi di verifica
 
@@ -452,3 +452,8 @@ In caso di errore `EPERM` su `.next` in Windows/OneDrive:
 - `d4bc0d2` - Add roles and core CRUD flows
 - `ca343ac` - Add project progress memory
 - `ff5ea33` - Add workflow and document handling
+
+## Import CSV e Checklist Sicurezza (In corso)
+- Verificato che l'import CSV per Contatti ed Export CSV per Contatti e Pratiche fossero già implementati (`src/app/contacts/import/`, `src/app/contacts/export/`, `src/app/cases/export/`).
+- Creata la `CHECKLIST_SICUREZZA.md` in `docs/` con i punti fondamentali per Autenticazione, RLS, Storage, API ed Edge Functions.
+- Aggiornato lo stato nel file `PROGRESSO.md` ("10. Import CSV e checklist sicurezza avanzata. Completato.").
