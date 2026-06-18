@@ -224,6 +224,11 @@ univoco del flusso medico:
 
 `npm run lint` ✅ · `npm run build` ✅ (type-check incluso) · `npm test` ✅ 124/124.
 
+## Sprint Sicurezza, Import e Funzionalità (2026-05-31)
+
+- **Checklist Sicurezza**: Creata `docs/CHECKLIST_SICUREZZA.md` per centralizzare le policy e garantire un onboarding sicuro per il team e l'AI.
+- **Import CSV Pratiche**: Aggiunta la funzionalità di import massivo per le pratiche con associazione automatica ai contatti tramite il Codice Fiscale. Pagine e form create in `src/app/cases/import`.
+
 ## Sprint sicurezza onboarding & multi-medico (2026-05-31)
 
 ### Approvazione account da parte dell'admin
@@ -416,7 +421,7 @@ Ultimo aggiornamento precedente: 2026-05-26
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
 8. Knowledge base. Da fare.
 9. Assistente AI OpenRouter implementato; RAG protetto da fare.
-10. Import CSV e checklist sicurezza avanzata. Da fare.
+10. Import CSV e checklist sicurezza avanzata. Completato.
 11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
 
 ## Team agenti attivo
@@ -431,7 +436,7 @@ Integrare i risultati dei worker in questo ordine:
 
 1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
 2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+3. Aggiungere import CSV e checklist sicurezza avanzata. Completato.
 
 ## Comandi di verifica
 
