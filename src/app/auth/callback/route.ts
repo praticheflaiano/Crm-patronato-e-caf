@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabasePublishableKey, getSupabaseUrl } from '@/utils/supabase/config'
+import { getSafeRedirect } from '@/utils/url'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -27,8 +28,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/access?error=no_email', requestUrl.origin))
   }
 
-  // Create a response that redirects to home
-  const response = NextResponse.redirect(new URL(redirectTo, requestUrl.origin))
+  // Create a response that redirects to home (validated to prevent Open Redirect)
+  const response = NextResponse.redirect(getSafeRedirect(redirectTo, requestUrl.origin))
 
   // Exchange the magic link token for a session using the SSR client
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
