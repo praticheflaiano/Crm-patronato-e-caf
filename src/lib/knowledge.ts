@@ -8,9 +8,9 @@ export const EMBEDDING_DIMENSIONS = 384
 
 // Roughly 1,200 characters per chunk with a small overlap so context isn't lost
 // across chunk boundaries. Kept simple and deterministic (no token model needed).
-const CHUNK_SIZE = 1200
-const CHUNK_OVERLAP = 150
-const MAX_CHUNKS = 400
+export const CHUNK_SIZE = 1200
+export const CHUNK_OVERLAP = 150
+export const MAX_CHUNKS = 400
 
 export type ExtractableKind = 'pdf' | 'docx' | 'text'
 
