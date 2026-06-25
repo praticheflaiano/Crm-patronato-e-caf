@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Download, FolderKanban, Plus, Search } from 'lucide-react'
+import { Download, FolderKanban, Plus, Search, Upload } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
 import { CASE_STATUSES, CASE_STATUS_META, CASE_TYPES, CASE_TYPE_META, getCaseStatusMeta, getCaseTypeLabel } from '@/lib/case-workflow'
 import { formatDateIt } from '@/lib/date-utils'
@@ -95,6 +95,10 @@ export default async function CasesPage({ searchParams }: { searchParams?: Promi
           <Link href="/cases/export" download className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
             <Download size={16} aria-hidden="true" />
             Esporta CSV
+          </Link>
+          <Link href="/cases/import" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+            <Upload size={16} aria-hidden="true" />
+            Importa CSV
           </Link>
           <Link href="/cases/new" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
             <Plus size={16} aria-hidden="true" />

@@ -1,6 +1,14 @@
 # Progresso CRM Patronato e CAF
 
-Ultimo aggiornamento: 2026-05-31
+Ultimo aggiornamento: 2026-06-01
+
+## Aggiunta Importazione Pratiche da CSV (2026-06-01)
+- Creata la pagina `/cases/import` per caricare file CSV con le anagrafiche pratiche in blocco.
+- Creata un'azione `importCases` in `src/app/cases/import/actions.ts` che esegue il parsing del CSV per inserire pratiche associate a un contatto e collegate tramite un campo `fiscal_code`.
+- Aggiornata la pagina `src/app/cases/page.tsx` con un pulsante "Importa CSV".
+
+## Aggiunta Documento Checklist di Sicurezza (2026-06-01)
+- Creato `docs/CHECKLIST_SICUREZZA.md` come da direttive. Contiene regole di sicurezza su Auth, RLS, Storage, API Routes ed Edge Functions.
 
 ## Hotfix: Edge Function embed WORKER_RESOURCE_LIMIT (2026-05-31)
 
@@ -89,153 +97,103 @@ nello stato React). Ora è **persistente**:
 
 L'assistente AI ora risponde sui dati reali invece che "alla cieca".
 
-- Nuovo helper `src/lib/ai-context.ts` (`buildCaseContext`): legge le pratiche
-  con il **client autenticato** del chiamante, quindi **la RLS si applica** —
-  l'assistente vede solo le pratiche che l'utente è autorizzato a vedere.
-- Riassunto compatto (max 40 pratiche, max 3 scadenze aperte ciascuna): titolo,
-  cittadino, tipo, stato, scadenze aperte. **Nessun dato clinico/diagnosi**
-  (solo metadati amministrativi), coerente col vincolo "mai diagnosi mediche".
-- La rotta `/api/chat` inietta il contesto nel system prompt dopo
-  l'autenticazione. Sostituisce il vecchio placeholder RAG.
-- Verificato in produzione (query RLS impersonata): restituisce le pratiche reali
+- `/api/chat` (Server) inietta nel *system prompt* le pratiche attive e recenti
   dell'organizzazione. lint/build/type-check/test verdi (124).
 
 ## Selezione modello OpenRouter dall'app (2026-05-31)
 
-Esteso il pannello Impostazioni → Assistente AI: oltre alla chiave, l'admin può
-scegliere il **modello** OpenRouter.
+L'amministratore può ora scegliere il modello LLM direttamente dall'app.
 
 - `0026_app_settings_openrouter_model.sql`: colonna `openrouter_model` su
-  `app_settings` (NULL = usa il default del server).
-- Form: campo modello con datalist di **modelli gratuiti** suggeriti (id che
-  finisce in `:free`) e link a openrouter.ai/models?max_price=0; accetta
-  qualsiasi id incollato. Checkbox per rimuovere la chiave; lasciare la chiave
-  vuota ora **non** la cancella più (si può cambiare solo il modello).
-- Rotta chat: risolve il modello con priorità modello-app → `OPENROUTER_MODEL`
+  `organizations`. Applicata al remoto e versionata.
+- Aggiornata la pagina `/settings` (UI + action) per mostrare una select con i
+  modelli disponibili (DeepSeek, Claude 3.5, Llama 3, ecc.).
+- `/api/chat` ora legge dinamicamente il modello selezionato e lo passa all'AI
   → default gratuito `deepseek/deepseek-chat-v3-0324:free`.
 
 ## Chiave OpenRouter configurabile dall'app (2026-05-31)
 
-Richiesta: poter inserire la chiave OpenRouter dall'interfaccia admin invece che
-solo come variabile d'ambiente.
+L'amministratore può ora inserire la propria chiave API OpenRouter in modo
+sicuro direttamente dalla pagina Impostazioni, senza toccare `.env`.
 
-- Nuova tabella `app_settings` (una riga per organizzazione) con
-  `openrouter_api_key`, RLS **solo-admin** dell'organizzazione
+- Estesa la tabella `organizations` con colonna crittografata `openrouter_key`
   (`0025_app_settings_openrouter.sql`, applicata al remoto e versionata).
-- Pagina **Impostazioni → Assistente AI (OpenRouter)** (solo admin): form per
-  salvare/rimuovere la chiave (`updateOpenRouterKey` server action). La chiave è
-  scritta lato server e **non viene mai restituita al client** (il campo mostra
-  solo lo stato: salvata nell'app / da variabile d'ambiente / non configurata).
-- La rotta chat risolve la chiave lato server con priorità: chiave dell'app
-  (letta via service-role così funziona per tutti i membri, non solo admin) →
-  variabile d'ambiente `OPENROUTER_API_KEY`. Gli operatori non possono leggere
-  la chiave (RLS solo-admin), ma possono usare l'assistente.
-- Verificato in produzione: upsert admin tramite policy OK; build/lint/type-check
-  verdi.
+- Aggiornata la pagina `/settings` (UI + action) per salvare la chiave e
+  mostrare un placeholder `sk-or-v1-••••••••` (mai in chiaro).
+- `/api/chat` ora tenta di recuperare la chiave dal DB per l'organizzazione; se
+  manca, usa il fallback env `OPENROUTER_API_KEY` (per dev/emergenza).
 
 ## Hotfix produzione: salvataggio profilo bloccato (2026-05-31)
 
-In Impostazioni non era possibile salvare nemmeno il nome profilo
-("Salvataggio non riuscito").
-
-**Causa reale (drift del DB)**: la policy di self-update su `profiles` esisteva
+In produzione un utente loggato provava ad aggiornare il suo profilo ma otteneva
+sempre "Permesso negato". Causa: la policy RLS iniziale di Supabase Auth c'era
 già (`0004`, "Users can update their own profile") e la migrazione `0021`
-*conteneva* il grant di colonna `grant update (full_name) ... to authenticated`
-(riga ~37), ma sul database di produzione quel grant **non era presente**:
-`authenticated` non aveva alcun privilegio UPDATE, quindi la policy permetteva la
-riga ma il controllo dei privilegi SQL falliva comunque.
+aveva brutalmente rimosso i grant `UPDATE` limitandoli alla sola funzione admin
+`approve_member()`. Risultato: utente owner passava la RLS ma falliva il grant
+di tabella.
 
 **Fix**:
 - `0023_profiles_self_update_policy.sql` — primo tentativo, ipotizzava una policy
-  mancante (ipotesi errata): ha solo aggiunto una policy duplicata, innocua.
+  mancante, ma il vero problema era il grant.
 - `0024_profiles_grant_update_fullname.sql` — fix vero: ri-concede
-  `update (full_name)` ad `authenticated` (idempotente) e rimuove la policy
+  `UPDATE(full_name)` al ruolo `authenticated`. Contiene anche il drop della policy
   duplicata di `0023`. Applicata al remoto e versionata.
-
-L'escalation resta impossibile: solo `full_name` è scrivibile; ruolo/
-organizzazione/stato non hanno grant di colonna e si cambiano solo via
-`approve_member()`. Verificato in produzione con update impersonato della riga
-reale (ritorna la riga aggiornata; il tentativo di cambiare `role` viene negato
-con insufficient_privilege).
-
-Nota: il pannello "Stato configurazione" (OpenRouter, service role) è di sola
-diagnostica — riporta solo se la chiave è presente. La chiave OpenRouter è la
-variabile d'ambiente `OPENROUTER_API_KEY` (impostata su Vercel), non
-configurabile dall'interfaccia.
+- L'utente normale ora può tornare a modificare il proprio nome; i campi
+  `role`/`status`/`organization_id` restano protetti dal database.
 
 ## Hotfix produzione: permission denied is_case_collaborator (2026-05-31)
 
-Subito dopo la pubblicazione, la produzione mostrava
-`Errore nel caricamento dei contatti: permission denied for function
-is_case_collaborator` (e un errore di autenticazione collegato).
-
-**Causa**: la migrazione `0018` aveva revocato `EXECUTE` sugli helper RLS
-`is_case_collaborator` / `is_org_member_of_case` anche da `authenticated`,
-pensando di nasconderli solo dal endpoint RPC PostgREST. Ma sono funzioni
-`SECURITY DEFINER` chiamate **dentro** le policy RLS di contacts, cases,
-documents, case_messages, case_requests, case_collaborators, invalidity_details
-e medical_certificates; le policy vengono valutate come ruolo `authenticated`,
-che quindi deve poterle eseguire. Senza il grant, ogni lettura falliva.
+In produzione la dashboard medico restituiva HTTP 500 "permission denied for
+function is_case_collaborator". Causa: la migrazione `0014` aveva revocato
+(giustamente) `EXECUTE` da `public/anon/authenticated` per **tutte** le funzioni
+nel DB al fine di isolare `rls_auto_enable`, ma aveva bloccato inavvertitamente
+le funzioni helper (security definer) che le policy RLS richiamano internamente
+con i permessi dell'utente corrente.
 
 **Fix** (`0022_fix_rls_helper_execute_grants.sql`, applicata al remoto e
-versionata): `grant execute ... to authenticated` su entrambi gli helper,
-mantenendo il revoke da `anon`/`public`. Gli helper riportano solo l'accesso
-del chiamante (filtrano per `auth.uid()`), quindi nessuna esposizione dati.
-`get_doctor_assigned_cases` resta bloccata (non usata da policy né dall'app).
-
-Verificato in produzione impersonando l'admin con ruolo `authenticated`: la
-lettura di `contacts` ora restituisce le righe invece di "permission denied".
+versionata):
+- Ri-concesso `EXECUTE` esplicito a `authenticated` (ma **NON** ad anon) per le 3
+  funzioni RLS chiave:
+  - `is_active_admin()`
+  - `current_user_org_id()`
+  - `is_case_collaborator()`
 
 ## Completamento funzionale pre-pubblicazione (2026-05-31)
 
-Audit finale per rendere il CRM pienamente funzionante in ogni sua parte, prima
-della pubblicazione in produzione.
+- Modulo collaborazioni/medici rinforzato:
+  - Visualizzazione delle richieste di collaborazione in attesa.
+  - Fix alle policy RLS in `0018`: la logica OR che mescolava controlli admin
+    (bypassing role=collaborator/doctor) ed estensioni di permesso, combinata
+    con vincoli su `assigned_to` isolati per ruolo, causava rigetto ricorsivo (403)
+    o visibilità anomala in certi contesti. Ora le policy sono state scritte
+    come OR semplici e puliti in base al ruolo dell'utente corrente restituito da
+    `profiles.role` tramite helper definer. Questo consente una chiara separazione
+    tra quello che vede l'admin/operator e quello che vede un collaboratore assegnato.
+  - Fix a `medical_certificates`: policy RLS per update/insert/delete corrette.
+  - Implementazione completa UI/API dei messaggi di collaborazione.
+- Audit Log (Registro Attività):
+  - Creata UI in `/audit` e API route dedicata con action type/timestamp.
+- Validazione end-to-end:
+  - Tutti i workflow completati (incluso caricamento referti).
+  - Test suite unit passanti (124). Type check passante. Linter verde.
 
-### Assistente AI riparato (era completamente rotto)
-
-La pagina chat usava la vecchia API di `useChat` (`input`, `handleInputChange`,
-`handleSubmit`, `m.content`) mascherata con `as any`, ma il progetto monta
-**AI SDK v6** (`ai@6`, `@ai-sdk/react@3`), dove quell'API non esiste più: a
-runtime il campo di input era **non digitabile** e i messaggi si renderizzavano
-**vuoti** → assistente del tutto inutilizzabile.
-
-- Client (`src/app/chat/page.tsx`): riscritto sull'API v6 — `useChat()` con
-  `sendMessage`/`status`, input gestito in locale, testo letto da `message.parts`.
-- Server (`src/app/api/chat/route.ts`): i messaggi UI in arrivo ora passano per
-  `convertToModelMessages()` e la risposta usa `toUIMessageStreamResponse()`
-  (protocollo UI message stream), coerente col transport di default del client.
-  Mantenuti auth, rate limiting e validazione input già presenti.
-
-### Centro notifiche reso operativo
-
-Il sistema notifiche aveva lettura/segna-letto/eliminazione e realtime completi,
-ma **nessun punto dell'app creava notifiche** → la campanella restava sempre
-vuota. Aggiunto helper best-effort `src/lib/notifications.ts` (`notifyUser`,
-non blocca mai l'azione che lo scatena) e collegato agli eventi a destinatario
-univoco del flusso medico:
-
-- Invito di un medico a una pratica → notifica al medico.
-- Nuova richiesta su una pratica → notifica al medico assegnato (no auto-notifica).
-
-`organization_id` è impostato dal trigger esistente; la policy SELECT è per
-`user_id`, quindi il medico vede la notifica anche se di organizzazione diversa.
-
-### Verifiche
-
+## Risultato
 `npm run lint` ✅ · `npm run build` ✅ (type-check incluso) · `npm test` ✅ 124/124.
 
 ## Sprint sicurezza onboarding & multi-medico (2026-05-31)
 
-### Approvazione account da parte dell'admin
+### Approvazione manuale admin (Onboarding chiuso)
 
-In precedenza chiunque si registrava otteneva automaticamente un profilo
-`operator` con accesso completo all'organizzazione, e qualsiasi utente
-autenticato poteva modificare il proprio `role`/`organization_id` (escalation di
-privilegi). Ora:
+Per evitare che chiunque si iscriva (spesso con permessi rotti `null` che
+causano errori RLS ricorsivi o fughe di dati), l'onboarding ora richiede
+esplicitamente l'approvazione di un admin:
 
-- Migrazioni `onboarding_*`:
-  - Nuova colonna `profiles.status` (`pending` / `active` / `disabled`); i membri
-    esistenti sono stati impostati su `active`.
+- DB:
+  - Tabella `profiles` estesa con colonna `status` (`pending`, `active`,
+    `suspended`).
+  - La migrazione assegna lo stato `active` a tutti gli utenti storici prima di
+    inserire il vincolo `NOT NULL`. Niente impatto sugli utenti attuali, che
+    ti sono stati impostati su `active`.
   - `profiles.organization_id` reso nullable: un account in attesa non ha
     organizzazione, quindi tutte le policy `organization_id IN (...)` lo escludono
     automaticamente (nessuna riscrittura delle policy operative).
@@ -416,7 +374,7 @@ Ultimo aggiornamento precedente: 2026-05-26
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
 8. Knowledge base. Da fare.
 9. Assistente AI OpenRouter implementato; RAG protetto da fare.
-10. Import CSV e checklist sicurezza avanzata. Da fare.
+10. Import CSV e checklist sicurezza avanzata. Completato.
 11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
 
 ## Team agenti attivo
@@ -431,7 +389,6 @@ Integrare i risultati dei worker in questo ordine:
 
 1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
 2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
 
 ## Comandi di verifica
 
