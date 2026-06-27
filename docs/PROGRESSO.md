@@ -431,7 +431,12 @@ Integrare i risultati dei worker in questo ordine:
 
 1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
 2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+3. Aggiungere import CSV e checklist sicurezza avanzata. Completato.
+
+## Checklist Sicurezza e Import Pratiche (Fase Corrente)
+
+- Creata la `docs/CHECKLIST_SICUREZZA.md` come riferimento unico per regole e best practice di sicurezza di sistema, inclusi dettagli su Auth, RLS, Storage, API ed Edge Functions.
+- Implementata la funzione "Importa CSV" per le pratiche (`/cases/import`) simile a quella dei contatti.
 
 ## Comandi di verifica
 
