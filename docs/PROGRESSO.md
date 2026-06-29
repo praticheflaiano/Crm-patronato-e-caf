@@ -1,6 +1,11 @@
 # Progresso CRM Patronato e CAF
 
-Ultimo aggiornamento: 2026-05-31
+Ultimo aggiornamento: 2026-06-29
+
+## Import CSV Ottimizzato e Checklist Sicurezza (2026-06-29)
+
+- Modificato l'import CSV dei contatti in `src/app/contacts/import/actions.ts` per utilizzare la pattern `upsert` (`onConflict: 'fiscal_code'`, `ignoreDuplicates: true`) e rimuovere query N+1 in modo da performare il caricamento rapido massivo calcolando gli inseriti e skippati correttamente.
+- Creata `docs/CHECKLIST_SICUREZZA.md` in base alle indicazioni e alle best practice di Supabase e Next.js per coprire vari ambiti di sicurezza del sistema (Auth, RLS, Storage, API, Edge Functions, AI/RAG).
 
 ## Hotfix: Edge Function embed WORKER_RESOURCE_LIMIT (2026-05-31)
 
@@ -431,7 +436,7 @@ Integrare i risultati dei worker in questo ordine:
 
 1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
 2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+3. Aggiungere import CSV e checklist sicurezza avanzata. (Completato)
 
 ## Comandi di verifica
 
