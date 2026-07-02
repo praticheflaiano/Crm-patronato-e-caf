@@ -108,14 +108,14 @@ export async function importCases(formData: FormData): Promise<ImportResult> {
     return { ok: false, message: 'Nessuna riga valida da importare.', errors: errors.slice(0, 10) }
   }
 
-  const { data, error } = await (supabase.from('cases') as any).insert(payload as never).select('id')
+  const { data, error } = await supabase.from('cases').insert(payload as never).select('id')
 
   let inserted = 0
   let skipped = 0
   if (error) {
      return { ok: false, message: `Errore durante il salvataggio dei dati nel database. ${error.message}` }
   } else {
-    inserted = (data as any[]).length;
+    inserted = (data as { id: string }[]).length;
     skipped = payload.length - inserted;
   }
 
