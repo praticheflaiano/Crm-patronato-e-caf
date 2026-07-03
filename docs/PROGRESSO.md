@@ -431,7 +431,7 @@ Integrare i risultati dei worker in questo ordine:
 
 1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
 2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+3. Aggiungere import CSV e checklist sicurezza avanzata. (Completato)
 
 ## Comandi di verifica
 

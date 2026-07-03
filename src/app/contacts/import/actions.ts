@@ -88,17 +88,24 @@ export async function importContacts(formData: FormData): Promise<ImportResult> 
     return { ok: false, message: 'Nessuna riga valida da importare.', errors: errors.slice(0, 10) }
   }
 
-  // Insert and skip rows whose fiscal code already exists (unique constraint).
+  // Upsert the payload to skip duplicates via onConflict. We use DO NOTHING
+  // logic via ignoreDuplicates: true, and return the unique key to calculate
+  // exact insertion counts.
   let inserted = 0
   let skipped = 0
-  for (const contact of payload) {
-    const { error } = await supabase.from('contacts').insert(contact as never)
-    if (error) {
-      skipped++
-      if (errors.length < 10) errors.push(`${(contact as { fiscal_code: string }).fiscal_code}: ${error.code === '23505' ? 'già presente' : 'non importato'}.`)
-    } else {
-      inserted++
-    }
+
+  const { data, error } = await supabase
+    .from('contacts')
+    .upsert(payload as never[], { onConflict: 'fiscal_code', ignoreDuplicates: true })
+    .select('fiscal_code')
+
+  if (error) {
+    errors.push(`Errore globale durante l'importazione: ${error.message}`)
+    skipped = payload.length
+  } else {
+    // data contains only successfully inserted/updated rows (which are only insertions due to ignoreDuplicates)
+    inserted = (data || []).length
+    skipped = payload.length - inserted
   }
 
   revalidatePath('/contacts')
