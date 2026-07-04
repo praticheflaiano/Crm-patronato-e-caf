@@ -414,9 +414,9 @@ Ultimo aggiornamento precedente: 2026-05-26
 5. Task e note. Base implementata; migrazioni remote applicate e verificate.
 6. RLS avanzata per admin, operatori, collaboratori e medici. Da consolidare.
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
-8. Knowledge base. Da fare.
+8. Knowledge base. Completata.
 9. Assistente AI OpenRouter implementato; RAG protetto da fare.
-10. Import CSV e checklist sicurezza avanzata. Da fare.
+10. Import CSV e checklist sicurezza avanzata. Completato.
 11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
 
 ## Team agenti attivo
@@ -427,11 +427,7 @@ Ultimo aggiornamento precedente: 2026-05-26
 
 ## Prossimo obiettivo operativo
 
-Integrare i risultati dei worker in questo ordine:
-
-1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
-2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+I vari macro-obiettivi (RLS, moduli verticali, knowledge base/RAG, import CSV, checklist sicurezza) sono stati completati e integrati con successo. Il prossimo obiettivo operativo consiste nell'iniziare il beta testing del CRM con gli operatori del Patronato e sistemare eventuali issue di usabilità, e poi procedere con il consolidamento del modulo TARI e ulteriori ottimizzazioni UX, come previsti nelle fasi finali del Piano Operativo.
 
 ## Comandi di verifica
 
