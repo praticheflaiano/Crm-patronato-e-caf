@@ -88,17 +88,21 @@ export async function importContacts(formData: FormData): Promise<ImportResult> 
     return { ok: false, message: 'Nessuna riga valida da importare.', errors: errors.slice(0, 10) }
   }
 
-  // Insert and skip rows whose fiscal code already exists (unique constraint).
-  let inserted = 0
-  let skipped = 0
-  for (const contact of payload) {
-    const { error } = await supabase.from('contacts').insert(contact as never)
-    if (error) {
-      skipped++
-      if (errors.length < 10) errors.push(`${(contact as { fiscal_code: string }).fiscal_code}: ${error.code === '23505' ? 'già presente' : 'non importato'}.`)
-    } else {
-      inserted++
-    }
+  // Insert and skip rows whose fiscal code already exists (unique constraint) using bulk upsert
+  const { data, error } = await supabase
+    .from('contacts')
+    .upsert(payload as never[], { onConflict: 'fiscal_code', ignoreDuplicates: true })
+    .select('fiscal_code')
+
+  if (error) {
+    return { ok: false, message: 'Errore durante il salvataggio dei contatti.' }
+  }
+
+  const inserted = data ? data.length : 0
+  const skipped = payload.length - inserted
+
+  if (skipped > 0 && errors.length < 10) {
+    errors.push('Alcuni contatti sono stati saltati perché già presenti o per errori.')
   }
 
   revalidatePath('/contacts')

@@ -2,6 +2,15 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Ottimizzazione Import CSV Contatti (2026-05-31)
+
+Rifattorizzato il meccanismo di importazione CSV per i contatti (`src/app/contacts/import/actions.ts`).
+Sostituito il ciclo `for` di insert (N+1 query) con una singola operazione di `upsert` bulk, sfruttando `ignoreDuplicates: true` e `onConflict: 'fiscal_code'`. Questo ottimizza drasticamente le prestazioni, elimina errori di timeout su file di grandi dimensioni e permette di tracciare accuratamente i record inseriti rispetto a quelli saltati (duplicati).
+- Validato con test, build e lint verdi.
+
+## Prossimo obiettivo: Import CSV pratiche (2026-05-31)
+Estendere la funzionalità di importazione massiva tramite CSV anche alle pratiche, implementando lo stesso pattern di performance con `upsert` bulk.
+
 ## Hotfix: Edge Function embed WORKER_RESOURCE_LIMIT (2026-05-31)
 
 In produzione la sezione Conoscenza mostrava "Embedding non riuscito: Edge
