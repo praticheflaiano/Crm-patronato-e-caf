@@ -2,6 +2,14 @@
 
 Ultimo aggiornamento: 2026-05-31
 
+## Import CSV Pratiche e Checklist Sicurezza (2026-05-31)
+
+Completata la fase di importazione massiva e consolidamento degli standard di sicurezza:
+
+- **Import CSV Pratiche**: implementata la rotta `/cases/import` e la logica server (`actions.ts`) per l'importazione da CSV delle pratiche, associandole ai contatti esistenti tramite Codice Fiscale. Aggiunto il pulsante nell'elenco pratiche.
+- **Checklist Sicurezza Avanzata**: creato il documento normativo `docs/CHECKLIST_SICUREZZA.md` che consolida le regole per Auth, RLS, Storage, API Routes, Edge Functions e AI/RAG.
+- Obiettivo 3 ("Aggiungere import CSV e checklist sicurezza avanzata") completato con successo.
+
 ## Hotfix: Edge Function embed WORKER_RESOURCE_LIMIT (2026-05-31)
 
 In produzione la sezione Conoscenza mostrava "Embedding non riuscito: Edge
@@ -431,7 +439,6 @@ Integrare i risultati dei worker in questo ordine:
 
 1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
 2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
 
 ## Comandi di verifica
 
