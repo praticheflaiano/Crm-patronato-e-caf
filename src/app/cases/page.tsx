@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Download, FolderKanban, Plus, Search } from 'lucide-react'
+import { Download, FolderKanban, Plus, Search, Upload } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
 import { CASE_STATUSES, CASE_STATUS_META, CASE_TYPES, CASE_TYPE_META, getCaseStatusMeta, getCaseTypeLabel } from '@/lib/case-workflow'
 import { formatDateIt } from '@/lib/date-utils'
@@ -92,6 +92,10 @@ export default async function CasesPage({ searchParams }: { searchParams?: Promi
           <p className="mt-1 text-sm text-slate-500">Controlla avanzamento, documenti mancanti e scadenze operative.</p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Link href="/cases/import" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+            <Upload size={16} aria-hidden="true" />
+            Importa CSV
+          </Link>
           <Link href="/cases/export" download className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
             <Download size={16} aria-hidden="true" />
             Esporta CSV
