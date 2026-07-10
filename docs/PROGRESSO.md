@@ -425,13 +425,15 @@ Ultimo aggiornamento precedente: 2026-05-26
 - Worker Documenti: upload su bucket `documents`, metadati e signed URL. Integrato.
 - Worker UX CRUD: uniformare form e stati vuoti. Integrato.
 
+## Obiettivi raggiunti
+
+L'integrazione delle funzionalità di import CSV (per contatti e pratiche) e la stesura della checklist di sicurezza avanzata hanno completato il ciclo di funzionalità previste da questo sprint. Tutti i moduli principali (Invalidità, TARI, Gestione Pratiche, Contatti, Storage, AI/RAG, e sicurezza via RLS/Audit/Onboarding) risultano ora integrati e operativi.
+
 ## Prossimo obiettivo operativo
 
-Integrare i risultati dei worker in questo ordine:
-
-1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
-2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+Procedere con una revisione end-to-end e finalizzazione del progetto:
+1. Eseguire test completi di sistema.
+2. Predisporre il progetto per la consegna/rilascio definitivo.
 
 ## Comandi di verifica
 
