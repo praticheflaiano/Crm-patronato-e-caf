@@ -427,11 +427,9 @@ Ultimo aggiornamento precedente: 2026-05-26
 
 ## Prossimo obiettivo operativo
 
-Integrare i risultati dei worker in questo ordine:
+I task 1 e 2 della precedente roadmap (RLS, RAG) ed il task 3 (checklist sicurezza e ottimizzazione import CSV con ignoreDuplicates) sono stati completati.
 
-1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
-2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+Il prossimo step per completare il progetto è verificare che tutte le funzionalità descritte nei requisiti siano pienamente implementate, condurre test E2E (se applicabile) o manuali sulle funzionalità principali (importazione CSV contatti, gestione RLS, RAG), e completare l'eventuale documentazione finale per il deploy.
 
 ## Comandi di verifica
 
