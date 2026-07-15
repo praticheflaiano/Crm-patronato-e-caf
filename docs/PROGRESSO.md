@@ -324,6 +324,11 @@ Questo sprint ha completato le funzionalità trasversali di qualità e la docume
 - `/api/chat`: aggiunti validazione input (numero/lunghezza messaggi) e rate
   limiting best-effort per utente per contenere costi/abusi OpenRouter.
 
+## Checklist Sicurezza Avanzata e Import CSV (Completati)
+
+- Creata la checklist di sicurezza in docs/CHECKLIST_SICUREZZA.md.
+- Verificata la presenza e implementazione dell'import CSV (gia' integrato).
+
 ## Storico
 
 Ultimo aggiornamento precedente: 2026-05-26
@@ -414,9 +419,9 @@ Ultimo aggiornamento precedente: 2026-05-26
 5. Task e note. Base implementata; migrazioni remote applicate e verificate.
 6. RLS avanzata per admin, operatori, collaboratori e medici. Da consolidare.
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
-8. Knowledge base. Da fare.
-9. Assistente AI OpenRouter implementato; RAG protetto da fare.
-10. Import CSV e checklist sicurezza avanzata. Da fare.
+8. Knowledge base. Completato.
+9. Assistente AI OpenRouter implementato; RAG protetto completato.
+10. Import CSV e checklist sicurezza avanzata. Completato.
 11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
 
 ## Team agenti attivo
