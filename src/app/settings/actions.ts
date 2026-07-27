@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
-import { getOrCreateUserProfile } from '@/lib/user-profile'
+import { getOrCreateUserProfile, isActiveMember } from '@/lib/user-profile'
 import { getSafeErrorMessage } from '@/lib/supabase-errors'
 
 export async function updateProfile(formData: FormData): Promise<{ ok: boolean; message?: string }> {
@@ -54,7 +54,7 @@ export async function updateOpenRouterKey(formData: FormData): Promise<{ ok: boo
   }
 
   const profile = await getOrCreateUserProfile(user)
-  if (!profile || profile.role !== 'admin' || !profile.organization_id) {
+  if (!isActiveMember(profile) || profile?.role !== 'admin') {
     return { ok: false, message: 'Permessi insufficienti.' }
   }
 
