@@ -91,13 +91,26 @@ export async function importContacts(formData: FormData): Promise<ImportResult> 
   // Insert and skip rows whose fiscal code already exists (unique constraint).
   let inserted = 0
   let skipped = 0
-  for (const contact of payload) {
-    const { error } = await supabase.from('contacts').insert(contact as never)
-    if (error) {
-      skipped++
-      if (errors.length < 10) errors.push(`${(contact as { fiscal_code: string }).fiscal_code}: ${error.code === '23505' ? 'già presente' : 'non importato'}.`)
-    } else {
-      inserted++
+
+  const { data: insertedData, error } = await supabase
+    .from('contacts')
+    .upsert(payload as never, { onConflict: 'fiscal_code', ignoreDuplicates: true })
+    .select('fiscal_code')
+
+  if (error) {
+    return { ok: false, message: 'Errore di sistema durante il salvataggio dei contatti.' }
+  }
+
+  const insertedFiscalCodes = new Set((insertedData as { fiscal_code: string }[] | null)?.map((d) => d.fiscal_code) || [])
+  inserted = insertedFiscalCodes.size
+  skipped = payload.length - inserted
+
+  if (skipped > 0) {
+    for (const contact of payload) {
+      const fc = (contact as { fiscal_code: string }).fiscal_code
+      if (!insertedFiscalCodes.has(fc)) {
+        if (errors.length < 10) errors.push(`${fc}: già presente.`)
+      }
     }
   }
 
