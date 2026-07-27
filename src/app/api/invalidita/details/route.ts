@@ -17,8 +17,16 @@ export async function POST(request: Request) {
     const inps_protocol_number = formData.get('inps_protocol_number') as string | null
     const certification_date = formData.get('certification_date') as string | null
     const certification_expiry_date = formData.get('certification_expiry_date') as string | null
-    const benefits_requested = JSON.parse(formData.get('benefits_requested') as string || '[]')
-    const benefits_approved = JSON.parse(formData.get('benefits_approved') as string || '[]')
+
+    let benefits_requested: any = []
+    let benefits_approved: any = []
+    try {
+      benefits_requested = JSON.parse(formData.get('benefits_requested') as string || '[]')
+      benefits_approved = JSON.parse(formData.get('benefits_approved') as string || '[]')
+    } catch {
+      return NextResponse.json({ ok: false, message: 'Formato JSON non valido per i benefici' }, { status: 400 })
+    }
+
     const assessment_status = formData.get('assessment_status') as string
     const ap70_filed = formData.get('ap70_filed') === 'true'
     const ap70_filing_date = formData.get('ap70_filing_date') as string | null
@@ -127,8 +135,16 @@ export async function PATCH(request: Request) {
     const inps_protocol_number = formData.get('inps_protocol_number') as string | null
     const certification_date = formData.get('certification_date') as string | null
     const certification_expiry_date = formData.get('certification_expiry_date') as string | null
-    const benefits_requested = JSON.parse(formData.get('benefits_requested') as string || '[]')
-    const benefits_approved = JSON.parse(formData.get('benefits_approved') as string || '[]')
+
+    let benefits_requested: any = []
+    let benefits_approved: any = []
+    try {
+      benefits_requested = JSON.parse(formData.get('benefits_requested') as string || '[]')
+      benefits_approved = JSON.parse(formData.get('benefits_approved') as string || '[]')
+    } catch {
+      return NextResponse.json({ ok: false, message: 'Formato JSON non valido per i benefici' }, { status: 400 })
+    }
+
     const assessment_status = formData.get('assessment_status') as string
     const ap70_filed = formData.get('ap70_filed') === 'true'
     const ap70_filing_date = formData.get('ap70_filing_date') as string | null
