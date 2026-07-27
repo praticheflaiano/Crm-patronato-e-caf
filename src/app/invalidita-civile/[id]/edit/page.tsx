@@ -1,11 +1,14 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
 import { InvaliditaForm } from '@/components/invalidita/InvaliditaForm'
+import type { Database } from '@/types/database'
+
+type CaseWithDetails = Database['public']['Tables']['cases']['Row'] & {
+  invalidity_details: Database['public']['Tables']['invalidity_details']['Row'] | Database['public']['Tables']['invalidity_details']['Row'][] | null
+}
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -29,13 +32,15 @@ export default async function EditInvaliditaPage({ params }: PageProps) {
     .eq('type', 'invalidita_civile')
     .single()
 
-  const caseDataTyped = caseData as any
+  const caseDataTyped = caseData as CaseWithDetails | null
 
   if (error || !caseDataTyped) {
     notFound()
   }
 
-  const invalidityDetails = caseDataTyped.invalidity_details
+  const invalidityDetails = Array.isArray(caseDataTyped.invalidity_details)
+    ? caseDataTyped.invalidity_details[0]
+    : caseDataTyped.invalidity_details
 
   return (
     <div className="space-y-6">
@@ -51,7 +56,7 @@ export default async function EditInvaliditaPage({ params }: PageProps) {
 
       <InvaliditaForm
         caseId={id}
-        existingData={invalidityDetails}
+        existingData={invalidityDetails || undefined}
       />
     </div>
   )
