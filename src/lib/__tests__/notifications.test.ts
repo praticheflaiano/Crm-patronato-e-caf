@@ -4,11 +4,11 @@ import { notifyUser } from '../notifications'
 describe('notifyUser', () => {
   it('calls insert with correct defaults', async () => {
     const insertMock = jest.fn().mockResolvedValue({ error: null })
-    const supabase: any = {
+    const supabase = {
       from: jest.fn().mockReturnValue({
         insert: insertMock,
       }),
-    }
+    } as unknown as { from: (table: string) => { insert: (values: unknown) => PromiseLike<{ error: unknown }> } }
 
     await notifyUser(supabase, {
       userId: 'user123',
@@ -28,11 +28,11 @@ describe('notifyUser', () => {
 
   it('calls insert with provided type and relatedId', async () => {
     const insertMock = jest.fn().mockResolvedValue({ error: null })
-    const supabase: any = {
+    const supabase = {
       from: jest.fn().mockReturnValue({
         insert: insertMock,
       }),
-    }
+    } as unknown as { from: (table: string) => { insert: (values: unknown) => PromiseLike<{ error: unknown }> } }
 
     await notifyUser(supabase, {
       userId: 'user123',
@@ -54,11 +54,11 @@ describe('notifyUser', () => {
 
   it('swallows errors without throwing', async () => {
     const insertMock = jest.fn().mockRejectedValue(new Error('DB Error'))
-    const supabase: any = {
+    const supabase = {
       from: jest.fn().mockReturnValue({
         insert: insertMock,
       }),
-    }
+    } as unknown as { from: (table: string) => { insert: (values: unknown) => PromiseLike<{ error: unknown }> } }
 
     // This should not throw
     await expect(
