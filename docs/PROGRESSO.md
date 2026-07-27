@@ -416,7 +416,7 @@ Ultimo aggiornamento precedente: 2026-05-26
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
 8. Knowledge base. Da fare.
 9. Assistente AI OpenRouter implementato; RAG protetto da fare.
-10. Import CSV e checklist sicurezza avanzata. Da fare.
+10. Import CSV e checklist sicurezza avanzata. Completato.
 11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
 
 ## Team agenti attivo
