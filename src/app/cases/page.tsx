@@ -66,8 +66,22 @@ export default async function CasesPage({ searchParams }: { searchParams?: Promi
   })
   const filteredCases = baseFiltered.filter(caseItem => status === 'all' || caseItem.status === status)
 
-  const statusCounts: Record<string, number> = { all: baseFiltered.length }
-  for (const item of CASE_STATUSES) statusCounts[item] = baseFiltered.filter(caseItem => caseItem.status === item).length
+  const statusCounts = baseFiltered.reduce(
+    (acc, caseItem) => {
+      const status = caseItem.status as string;
+      if (status) {
+        acc[status] = (acc[status] || 0) + 1;
+      }
+      return acc;
+    },
+    CASE_STATUSES.reduce(
+      (acc, status) => {
+        acc[status] = 0;
+        return acc;
+      },
+      { all: baseFiltered.length } as Record<string, number>
+    )
+  )
 
   function quickFilterHref(nextStatus: string) {
     const sp = new URLSearchParams()
