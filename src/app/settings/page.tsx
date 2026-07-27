@@ -3,12 +3,9 @@ import { CheckCircle2, Settings, ShieldAlert, Users } from 'lucide-react'
 import { SetupNotice } from '@/components/setup-notice'
 import { hasSupabaseConfig } from '@/utils/supabase/config'
 import { createClient } from '@/utils/supabase/server'
-import { getOrCreateUserProfile, formatRole } from '@/lib/user-profile'
+import { getOrCreateUserProfile, formatRole, type UserProfile } from '@/lib/user-profile'
 import { ProfileForm } from './profile-form'
 import { OpenRouterKeyForm } from './openrouter-form'
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ProfileRecord = Record<string, any>
 
 // Diagnostics shown to admins: report whether key integrations are configured,
 // WITHOUT ever exposing secret values (only presence is reported).
@@ -40,7 +37,7 @@ export default async function SettingsPage() {
     redirect('/login')
   }
 
-  let members: ProfileRecord[] = []
+  let members: Pick<UserProfile, 'id' | 'full_name' | 'role'>[] = []
   const systemChecks = profile.role === 'admin' ? getSystemChecks() : []
   let openRouterConfigured = false
   let openRouterSource: 'db' | 'env' | 'none' = 'none'
@@ -50,19 +47,20 @@ export default async function SettingsPage() {
       .from('profiles')
       .select('id, full_name, role')
       .eq('organization_id', profile.organization_id)
-    members = Array.isArray(data) ? (data as ProfileRecord[]) : []
+    members = Array.isArray(data) ? (data as Pick<UserProfile, 'id' | 'full_name' | 'role'>[]) : []
 
     // Determine the OpenRouter key status without exposing the key value to the
     // client; the model id is not secret and is pre-filled into the form.
     let hasDbKey = false
     if (profile.organization_id) {
+      type AppSettingsRow = { openrouter_api_key?: string | null; openrouter_model?: string | null; }
       const { data: settings } = await supabase
         .from('app_settings')
         .select('openrouter_api_key, openrouter_model')
         .eq('organization_id', profile.organization_id)
         .maybeSingle()
-      hasDbKey = Boolean((settings as ProfileRecord | null)?.openrouter_api_key)
-      openRouterModel = String((settings as ProfileRecord | null)?.openrouter_model ?? '')
+      hasDbKey = Boolean((settings as AppSettingsRow | null)?.openrouter_api_key)
+      openRouterModel = String((settings as AppSettingsRow | null)?.openrouter_model ?? '')
     }
     const hasEnvKey = Boolean(process.env.OPENROUTER_API_KEY)
     openRouterConfigured = hasDbKey || hasEnvKey
