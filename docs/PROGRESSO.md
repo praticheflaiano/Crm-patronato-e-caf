@@ -412,12 +412,12 @@ Ultimo aggiornamento precedente: 2026-05-26
 3. Pipeline pratiche e stati strutturati. Base completata.
 4. Documenti con upload/download privato. Base completata.
 5. Task e note. Base implementata; migrazioni remote applicate e verificate.
-6. RLS avanzata per admin, operatori, collaboratori e medici. Da consolidare.
-7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
-8. Knowledge base. Da fare.
-9. Assistente AI OpenRouter implementato; RAG protetto da fare.
+6. RLS avanzata per admin, operatori, collaboratori e medici. Completato.
+7. Modulo Invalidita Civile. Completato.
+8. Knowledge base. Completato.
+9. Assistente AI OpenRouter implementato; RAG protetto completato.
 10. Import CSV e checklist sicurezza avanzata. Completato.
-11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
+11. Modulo TARI Roma/AMA. Completato.
 
 ## Team agenti attivo
 
@@ -427,11 +427,7 @@ Ultimo aggiornamento precedente: 2026-05-26
 
 ## Prossimo obiettivo operativo
 
-Integrare i risultati dei worker in questo ordine:
-
-1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
-2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+**Progetto Completato.** Tutte le funzionalità richieste (RLS, Knowledge Base, RAG, AI OpenRouter, Export/Import) sono state implementate con successo e verificate.
 
 ## Comandi di verifica
 
