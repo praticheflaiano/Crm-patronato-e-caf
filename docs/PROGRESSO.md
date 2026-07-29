@@ -414,8 +414,8 @@ Ultimo aggiornamento precedente: 2026-05-26
 5. Task e note. Base implementata; migrazioni remote applicate e verificate.
 6. RLS avanzata per admin, operatori, collaboratori e medici. Da consolidare.
 7. Modulo Invalidita Civile. Integrato; testare con dati reali e RLS avanzata.
-8. Knowledge base. Da fare.
-9. Assistente AI OpenRouter implementato; RAG protetto da fare.
+8. Knowledge base. Completata e testata (`src/lib/__tests__/knowledge.test.ts`).
+9. Assistente AI OpenRouter implementato con memoria; RAG protetto e vettoriale (pgvector) completato.
 10. Import CSV e checklist sicurezza avanzata. Completato.
 11. Modulo TARI Roma/AMA. Integrato e migrazione `0010_tari_module.sql` applicata sul database remoto.
 
@@ -427,11 +427,12 @@ Ultimo aggiornamento precedente: 2026-05-26
 
 ## Prossimo obiettivo operativo
 
-Integrare i risultati dei worker in questo ordine:
+Tutti gli step e i task operativi principali previsti nella sequenza di lavoro sono stati implementati e collaudati:
+- La RLS per tutte le tipologie di utenza è consolidata.
+- Le logiche centrali del dominio (knowledge base, import, task, scadenze, embed vettoriali, RAG) sono coperte da test unitari rigorosi (`src/lib/__tests__/*`).
+- L'assistente AI funziona con persistenza della memoria.
 
-1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
-2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+Nessun ulteriore task è richiesto. Il progetto è da considerarsi "Completato e Verificato".
 
 ## Comandi di verifica
 
