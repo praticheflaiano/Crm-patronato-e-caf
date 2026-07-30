@@ -340,6 +340,10 @@ Ultimo aggiornamento precedente: 2026-05-26
 
 ## Stato completato
 
+### Sicurezza e RLS
+
+- Consolidata RLS avanzata per collaboratori, medici e moduli verticali. (Migrazione `0028` applicata per limitare l'accesso ai contatti, documenti e note task solo alle pratiche/task assegnati).
+
 ### Setup e pubblicazione
 
 - Progetto locale collegato al repository GitHub.
@@ -429,9 +433,8 @@ Ultimo aggiornamento precedente: 2026-05-26
 
 Integrare i risultati dei worker in questo ordine:
 
-1. Consolidare RLS avanzata per collaboratori, medici e moduli verticali.
-2. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
-3. Aggiungere import CSV e checklist sicurezza avanzata.
+1. Collegare knowledge base/RAG ufficiale per TARI e altri servizi.
+2. Aggiungere import CSV e checklist sicurezza avanzata.
 
 ## Comandi di verifica
 
