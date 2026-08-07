@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { FileText, Loader2, Trash2, Upload, Type, CheckCircle2, AlertCircle } from 'lucide-react'
+import { FileText, Loader2, Trash2, Upload, Type, CheckCircle2, AlertCircle, Book } from 'lucide-react'
+import { TARI_OFFICIAL_SOURCES, TARI_WORKFLOW_STEPS, TARI_DOCUMENT_CHECKLISTS, TARI_MODULE_MAP } from '@/lib/tari'
 
 type KnowledgeDoc = {
   id: string
@@ -127,6 +128,52 @@ export function KnowledgeManager() {
     }
   }
 
+  async function handleImportTari() {
+    setBusy(true)
+    setMessage(null)
+    try {
+      const title = 'Manuale Operativo TARI Roma/AMA'
+      let text = `# ${title}\n\n`
+
+      text += `## Fonti Ufficiali\n`
+      TARI_OFFICIAL_SOURCES.forEach(s => {
+        text += `- **${s.title}**: ${s.note} (URL: ${s.href})\n`
+      })
+
+      text += `\n## Workflow Operativo\n`
+      TARI_WORKFLOW_STEPS.forEach(s => {
+        text += `### ${s.title}\n${s.summary}\n`
+        s.bullets.forEach(b => text += `- ${b}\n`)
+      })
+
+      text += `\n## Checklist Documentali\n`
+      TARI_DOCUMENT_CHECKLISTS.forEach(c => {
+        text += `### ${c.title}\n`
+        c.bullets.forEach(b => text += `- ${b}\n`)
+      })
+
+      text += `\n## Modulistica TARI\n`
+      TARI_MODULE_MAP.forEach(m => {
+        text += `### ${m.code} - ${m.title}\n`
+        text += `Uso: ${m.useCase}\nNota: ${m.note}\n`
+      })
+
+      const res = await fetch('/api/knowledge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, text }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || 'Salvataggio non riuscito.')
+      setMessage({ ok: true, text: `"${title}" importato con successo (${data.chunks} frammenti).` })
+      await refresh()
+    } catch (err) {
+      setMessage({ ok: false, text: err instanceof Error ? err.message : 'Errore durante l\'importazione.' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {message && (
@@ -157,8 +204,27 @@ export function KnowledgeManager() {
           )}
         </section>
 
-        {/* Paste text */}
+        {/* Importazioni Ufficiali */}
         <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-slate-950">
+            <Book size={18} aria-hidden="true" /> Importazioni Ufficiali
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">Aggiungi la manualistica predefinita del sistema alla base di conoscenza.</p>
+          <div className="mt-4 space-y-3">
+            <button
+              type="button"
+              onClick={handleImportTari}
+              disabled={busy}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+            >
+              <Book size={16} aria-hidden="true" className="text-blue-600" />
+              Importa manuale TARI Roma/AMA
+            </button>
+          </div>
+        </section>
+
+        {/* Paste text */}
+        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
           <h2 className="flex items-center gap-2 text-base font-semibold text-slate-950">
             <Type size={18} aria-hidden="true" /> Incolla testo
           </h2>
